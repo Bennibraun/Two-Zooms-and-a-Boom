@@ -33,9 +33,10 @@ setInterval(function() {
     io.sockets.emit('message', 'hi!');
 }, 1000);
 
+// console.log(io);
+
 // Listens for msgs with a specific 'name'
-// var socket = io.connect();
+// var socket = io.connect('');
 // socket.on('name', function(data) {
 //     // data is a parameter containing whatever data was sent
 // });
-
