@@ -24,8 +24,18 @@ server.listen(5000, function() {
     console.log('Starting server on port 5000');
 });
 
+var players = {};
+
 // WebSocket handlers
-io.on('connection', function(socket) { });
+io.on('connection', function(socket) {
+    socket.on('new player', function() {
+        players[socket.id] = {
+            card: '',
+            room: '',
+
+        }
+    })
+});
 
 
 //TODO: modify testing message
@@ -33,10 +43,3 @@ setInterval(function() {
     io.sockets.emit('message', 'hi!');
 }, 1000);
 
-// console.log(io);
-
-// Listens for msgs with a specific 'name'
-// var socket = io.connect('');
-// socket.on('name', function(data) {
-//     // data is a parameter containing whatever data was sent
-// });
