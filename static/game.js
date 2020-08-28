@@ -17,3 +17,4 @@ socket.emit('new player');
 setInterval(function() {
     socket.emit('player', player);
 }, 1000/60);
+
