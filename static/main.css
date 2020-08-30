@@ -1,0 +1,58 @@
+h1 {   
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 40px;
+    letter-spacing: -1px;
+    word-spacing: 1px;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    font-style: bold;
+    font-variant: normal;
+}
+
+h2 {   
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 40px;
+    letter-spacing: -1px;
+    word-spacing: 1px;
+    color: white;
+    font-weight: 700;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: normal;
+}
+
+div {
+    text-align: center;
+    border: 1px transparent;
+}
+
+body {
+    background-color: black;
+}
+
+.startButton {
+    color: rgb(255, 255, 255); 
+    font-size: 30px; 
+    line-height: 20px;     
+    padding: 10px; 
+    padding-right: 10vw;
+    padding-left: 10vw;
+    border-radius: 15px; 
+    font-family: Verdana, Geneva, sans-serif; 
+    font-weight: 700; text-decoration: none; 
+    font-style: normal; font-variant: normal; 
+    text-transform: uppercase; 
+    background-image: linear-gradient(to right, rgb(28, 110, 164) 0%, rgb(35, 136, 203) 50%, rgb(20, 78, 117) 100%); 
+    box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px; 
+    border: 2px solid rgb(28, 110, 164); 
+    display: inline-block;
+}
+
+.startButton:hover {
+    background: #1C6EA4; 
+}
+    
+.startButton:active {
+    background: #144E75; 
+}
