@@ -32,9 +32,26 @@ io.on('connection', function(socket) {
         players[socket.id] = {
             card: '',
             room: '',
-
+            isLeader: false
         }
-    })
+        console.log(players);
+    });
+
+    socket.on('player', function(data) {
+        var player = players[socket.id] || {};
+        if (data.card == "agent") {
+            console.log("He's an agent!");
+        }
+        if (data.color == "blue") {
+            console.log("He's blue!");
+        }
+        if (data.room == "1") {
+            console.log("He's in room 1!");
+        }
+        if (!data.isLeader) {
+            console.log("He's a leader!");
+        }
+    });
 });
 
 

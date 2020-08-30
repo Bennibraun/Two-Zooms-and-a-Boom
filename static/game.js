@@ -7,14 +7,15 @@ socket.on('message', function(data) {
 });
 
 var player = {
-    card: '',
-    room: '',
+    card: "agent",
+    color: "blue",
+    room: "1",
     isLeader: false
 }
 
 
 socket.emit('new player');
 setInterval(function() {
-    socket.emit('player', player);
-}, 1000/60);
+    // socket.emit('player', player);
+}, 1/60);
 
