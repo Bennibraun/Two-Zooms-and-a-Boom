@@ -56,3 +56,12 @@ body {
 .startButton:active {
     background: #144E75; 
 }
+
+label {
+    color: white;
+}
+
+.container { 
+    overflow:hidden;
+    padding:10px;
+}
