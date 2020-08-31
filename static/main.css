@@ -22,17 +22,27 @@ h2 {
     font-variant: normal;
 }
 
+h3 {
+    color: hotpink;
+}
+
 div {
     text-align: center;
     border: 1px transparent;
 }
 
 body {
-    background-color: black;
+    background-color: #050505;
 }
 
 .startButton {
-    color: rgb(255, 255, 255); 
+	box-shadow:inset 0px 1px 0px 0px #cf866c;
+	background-color:#a80000;
+	border-radius:3px;
+	border:1px solid #740000;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
     font-size: 30px; 
     line-height: 20px;     
     padding: 10px; 
@@ -43,16 +53,12 @@ body {
     font-weight: 700; text-decoration: none; 
     font-style: normal; font-variant: normal; 
     text-transform: uppercase; 
-    background-image: linear-gradient(to right, rgb(28, 110, 164) 0%, rgb(35, 136, 203) 50%, rgb(20, 78, 117) 100%); 
-    box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px; 
-    border: 2px solid rgb(28, 110, 164); 
-    display: inline-block;
+	text-shadow:0px 1px 0px #7e0000;
 }
-
 .startButton:hover {
-    background: #1C6EA4; 
+	background-color:#750000;
 }
-    
 .startButton:active {
-    background: #144E75; 
+	position:relative;
+	top:1px;
 }
