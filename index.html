@@ -1,6 +1,8 @@
 <html>
 <head>
-    <title>Multiplayer Test Game</title>
+    <title>Two Zoom</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
     
@@ -11,6 +13,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
 
     <link rel="stylesheet" href="/static/main.css">
+
+    <link rel="shortcut icon" href="/static/bomb.png" />
 </head>
 
 <body>
@@ -51,10 +55,22 @@
         </div>
     </div>
 
+    <div style="margin-top: 10vh;">
+        <h1>TWO ZOOMS & A BOOM</h1>
+        <h2 style="font-size: xx-large;" id="roomCodeDisplay"></h2>
+    </div>
 
-    <div>
-        <h3 class="startButton">START</h3>
-    <div>
+    <div style="padding: 15px; border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 10vw; margin-left: 10vw;">
+        <h2 style="margin-top: 0px;">PLAYERS</h2>
+        <ul id="playersInRoom">
+        </ul>
+        <br><br>
+        <form action="/start" method="post">
+            <button class="startButton">START</button>
+        </form>
+        <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
+    </div>
+
 
 
 </body>

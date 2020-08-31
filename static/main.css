@@ -44,21 +44,80 @@ body {
 	cursor:pointer;
 	color:#ffffff;
     font-size: 30px; 
+
+.startButton, .leaveButton {
+    color: white; 
+    font-size: 20px; 
+
     line-height: 20px;     
-    padding: 10px; 
-    padding-right: 10vw;
-    padding-left: 10vw;
+    padding: 10px;
+    padding-right: 15px;
+    padding-left: 15px;
     border-radius: 15px; 
     font-family: Verdana, Geneva, sans-serif; 
     font-weight: 700; text-decoration: none; 
     font-style: normal; font-variant: normal; 
     text-transform: uppercase; 
+
 	text-shadow:0px 1px 0px #7e0000;
+
+    background-image: linear-gradient(to right, rgb(28, 110, 164) 0%, rgb(35, 136, 203) 50%, rgb(20, 78, 117) 100%); 
+    box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px; 
+    border: 2px solid rgb(28, 110, 164); 
+    display: inline-block;
+    outline: none;
+}
+
+.leaveButton {
+    font-size: 15px;
+    background-image: linear-gradient(to right, rgb(164, 28, 28) 0%, rgb(203, 35, 35) 50%, rgb(117, 20, 20) 100%);
+    border: 2px solid rgb(164, 28, 28); 
+
 }
 .startButton:hover {
 	background-color:#750000;
 }
+
 .startButton:active {
 	position:relative;
 	top:1px;
+}
+=======
+
+.leaveButton:hover {
+    background: #a41c1c; 
+}
+
+.startButton:active {
+    background: #144E75; 
+}
+
+.leaveButton:active {
+    background: #751414; 
+}
+
+label {
+    color: white;
+}
+
+.container { 
+    overflow:hidden;
+    padding:10px;
+}
+
+ul {
+    list-style-position: inside;
+    color: white;
+    margin: auto;
+    padding: 10px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: x-large;
+    width: 15%;
+    text-align: left;
+}
+
+.removePlayer {
+    color: red;
+    float: right;
+    cursor: pointer;
 }
