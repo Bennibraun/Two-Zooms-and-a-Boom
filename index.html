@@ -2,6 +2,8 @@
 <head>
     <title>Two Zoom</title>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
     <script src="/socket.io/socket.io.js"></script>
     
     <!-- Latest compiled and minified CSS -->
@@ -11,6 +13,8 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
 
     <link rel="stylesheet" href="/static/main.css">
+
+    <link rel="shortcut icon" href="/static/bomb.png" />
 </head>
 
 <body>
@@ -19,13 +23,13 @@
         <h1>TWO ZOOMS & A BOOM</h1>
     </div>
 
-    <div style="border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 30vw; margin-left: 30vw; min-width: 600px;">
-        <h2>PLAYERS</h2>
-    <div>
+    <div style="padding: 15px; border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 30vw; margin-left: 30vw;">
+        <h2 style="margin-top: 0px;">PLAYERS</h2>
+        <ul id="playersInRoom">
+        </ul>
+        <button class="startButton">START</button>
+    </div>
 
-    <div>
-        <h3 class="startButton">START</h3>
-    <div>
 
 
 </body>

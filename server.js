@@ -8,6 +8,7 @@ var socketIO = require('socket.io');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser')
 var cookie = require("cookie");
+var $ = jQuery = require('jquery');
 
 var app = express();
 var server = http.Server(app);
@@ -20,7 +21,12 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// For later: generate random room code
+// Math.random().toString(36).substring(2, 15)
+
 var players = {};
+var rooms = {};
+rooms['ABCD'] = {players:["p1","p2","p3"]};
 
 // Routing
 app.get('/', function(req, res) {
@@ -49,7 +55,7 @@ app.get('/join', function(req, res) {
     if (!players[name]) {
         players[name] = {
             card: 'sampleCard',
-            room: 'sampleRoom',
+            room: 'ABCD',
             isLeader: false,
             isHost: false
         }
@@ -70,35 +76,28 @@ io.on('connection', function(socket) {
         if (!players[name]) {
             players[name] = {
                 card: 'sampleCard',
-                room: 'sampleRoom',
+                room: 'ABCD',
                 isLeader: false,
                 isHost: false
             }
         }
         console.log(name + ": ");
         console.log(players[name]);
-    });
 
-    socket.on('player', function(data) {
-        var player = players[data.name] || {};
-        if (data.card == "agent") {
-            console.log("He's an agent!");
+        // Add player to room
+        var currentRoom = 'ABCD';
+        for (room in rooms) {
+            if (players[name].room == room) {
+                console.log('room found.');
+                rooms[room].players.push(name);
+                currentRoom = room;
+                socket.join('ABCD');
+                console.log('room joined')
+            }
         }
-        if (data.color == "blue") {
-            console.log("He's blue!");
-        }
-        if (data.room == "1") {
-            console.log("He's in room 1!");
-        }
-        if (!data.isLeader) {
-            console.log("He's a leader!");
-        }
+        
+        // Tell player who's in the room
+        io.to('ABCD').emit('players', 'teststr');//rooms[currentRoom].players.toString());
+
     });
 });
-
-
-//TODO: modify testing message
-setInterval(function() {
-    io.sockets.emit('message', 'hi!');
-}, 1000);
-

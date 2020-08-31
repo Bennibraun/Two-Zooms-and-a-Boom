@@ -2,12 +2,13 @@
 
 // listens for messages on a specific channel
 var socket = io();
-socket.on('message', function(data) {
-    console.log(data);
+
+socket.on('players', function(players) {    
+    console.log(players);
+    console.log("done");
+    // roomList = $("#playersInRoom").html();
+    // List all players in the room on the html list
 });
 
 socket.emit('new player');
-// setInterval(function() {
-//     // socket.emit('player', player);
-// }, 1/60);
 

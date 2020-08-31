@@ -47,6 +47,7 @@ body {
     box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px; 
     border: 2px solid rgb(28, 110, 164); 
     display: inline-block;
+    outline: none;
 }
 
 .startButton:hover {
@@ -64,4 +65,13 @@ label {
 .container { 
     overflow:hidden;
     padding:10px;
+}
+
+ul {
+    list-style-position: inside;
+    color: white;
+    margin: 0;
+    padding: 10px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-size: large;
 }
