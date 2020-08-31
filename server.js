@@ -22,6 +22,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 
+// Utility FN
+Object.filter = (obj, predicate) => 
+    Object.keys(obj)
+          .filter( key => predicate(obj[key]) )
+          .reduce( (res, key) => (res[key] = obj[key], res), {} );
+
 
 var players = {};
 var rooms = {};
@@ -98,11 +104,6 @@ app.get('/host', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/leave', function(req, res) {
-    res.cookie('name','', { expires: new Date(Date.now()-1) });
-    res.redirect('/');
-});
-
 // Start the server
 server.listen(process.env.PORT || 5000, function() {
     console.log('Starting server');
@@ -140,8 +141,9 @@ io.on('connection', function(socket) {
             }
         }
 
-        if (!currentRoom) {
+        if (!currentRoom || !rooms[currentRoom]) {
             console.log("Room not found.");
+
         }
         else {
             // Tell client who's in the room
@@ -155,5 +157,21 @@ io.on('connection', function(socket) {
     socket.on('leaveRoom',function(data) {
         socket.leave(currentRoom);
         console.log('socket no longer in room');
+        // Remove player from lists
+        delete players[name];
+        // Remove from room if in one
+        if (rooms[currentRoom]) {
+            rooms[currentRoom].players = rooms[currentRoom].players.filter(function(p) {
+                if (p != name) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
+        // Update clients
+        io.to(currentRoom).emit('players', rooms[currentRoom].players);
     });
 });

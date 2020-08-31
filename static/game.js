@@ -29,6 +29,7 @@ socket.emit('new player');
 function leaveLobby() {
     console.log('leaving lobby');
     delete_cookie("name");
+    delete_cookie("roomCode");
     socket.emit('leaveRoom','');
     location.reload();
 }
