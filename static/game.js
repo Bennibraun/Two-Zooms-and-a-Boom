@@ -14,6 +14,10 @@ socket.on('players', function(players) {
     });
 });
 
+socket.on('roomCode', function(roomCode) {
+    $("#roomCodeDisplay").text("Room Code: " + roomCode);
+});
+
 socket.on('delete_cookie', (cookie) => {
     document.cookie = cookie + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 });

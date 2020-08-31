@@ -21,8 +21,7 @@ app.use(cookieParser())
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// For later: generate random room code
-// Math.random().toString(36).substring(2, 15)
+
 
 var players = {};
 var rooms = {};
@@ -49,19 +48,51 @@ app.get('/', function(req, res) {
 
 app.get('/join', function(req, res) {
     var name = req.query.nameInput;
+    var roomCode = req.query.joinCodeInput;
     if (players[name]) {
         console.log("Name taken. Try again.");
         res.sendFile(path.join(__dirname, 'landing_page.html'));
     }
     console.log(name);
-    // res.setHeader('Set-Cookie', ['name='+name])
     res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
+    res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
+
     if (!players[name]) {
         players[name] = {
             card: 'None',
-            room: 'Lobby',
+            room: roomCode,
             isLeader: false,
             isHost: false
+        }
+    }
+    res.redirect('/');
+});
+
+app.get('/host', function(req, res) {
+    var name = req.query.nameInput;
+    if (players[name]) {
+        console.log("Name taken. Try again.");
+        res.sendFile(path.join(__dirname, 'landing_page.html'));
+    }
+    console.log(name);
+    res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
+
+    // Random lobby code string
+    var roomCode = Math.random().toString(36).substring(2, 6);
+    console.log(roomCode);
+
+    res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
+
+    io.to(roomCode).emit('roomCode',roomCode);
+
+    rooms[roomCode] = {players:[name]};
+
+    if (!players[name]) {
+        players[name] = {
+            card: 'None',
+            room: roomCode,
+            isLeader: false,
+            isHost: true
         }
     }
     res.redirect('/');
@@ -80,13 +111,14 @@ server.listen(process.env.PORT || 5000, function() {
 
 // WebSocket handlers
 io.on('connection', function(socket) {
-    var name = cookie.parse(socket.handshake.headers.cookie).name;
-    var currentRoom;
+    var cookies = cookie.parse(socket.handshake.headers.cookie);
+    var name = cookies.name;
+    var currentRoom = cookies.roomCode;
     socket.on('new player', function() {
         if (!players[name]) {
             players[name] = {
                 card: 'sampleCard',
-                room: 'Lobby',
+                room: '',
                 isLeader: false,
                 isHost: false
             }
@@ -114,7 +146,9 @@ io.on('connection', function(socket) {
         else {
             // Tell client who's in the room
             io.to(currentRoom).emit('players', rooms[currentRoom].players);
+            io.to(currentRoom).emit('roomCode',currentRoom);
         }
+
     });
 
     // Remove socket from the lobby
