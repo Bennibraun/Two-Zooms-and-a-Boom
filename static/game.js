@@ -8,7 +8,7 @@ socket.on('players', function(players) {
     
     // List all players in the room on the html list
     pList = $("#playersInRoom");
-    pList = "";
+    pList.empty();
     $.each(players,function(p) {
         $('<li/>').text(players[p]).appendTo(pList);
     });
