@@ -31,13 +31,13 @@ body {
     background-color: black;
 }
 
-.startButton {
-    color: rgb(255, 255, 255); 
-    font-size: 30px; 
+.startButton, .leaveButton {
+    color: white; 
+    font-size: 20px; 
     line-height: 20px;     
-    padding: 10px; 
-    padding-right: 10vw;
-    padding-left: 10vw;
+    padding: 10px;
+    padding-right: 15px;
+    padding-left: 15px;
     border-radius: 15px; 
     font-family: Verdana, Geneva, sans-serif; 
     font-weight: 700; text-decoration: none; 
@@ -50,12 +50,26 @@ body {
     outline: none;
 }
 
+.leaveButton {
+    font-size: 15px;
+    background-image: linear-gradient(to right, rgb(164, 28, 28) 0%, rgb(203, 35, 35) 50%, rgb(117, 20, 20) 100%);
+    border: 2px solid rgb(164, 28, 28); 
+}
+
 .startButton:hover {
     background: #1C6EA4; 
 }
-    
+
+.leaveButton:hover {
+    background: #a41c1c; 
+}
+
 .startButton:active {
     background: #144E75; 
+}
+
+.leaveButton:active {
+    background: #751414; 
 }
 
 label {
@@ -73,5 +87,5 @@ ul {
     margin: 0;
     padding: 10px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: large;
+    font-size: x-large;
 }

@@ -67,6 +67,11 @@ app.get('/join', function(req, res) {
     res.redirect('/');
 });
 
+app.get('/leave', function(req, res) {
+    res.cookie('name','', { expires: new Date(Date.now()-1) });
+    res.redirect('/');
+});
+
 // Start the server
 server.listen(process.env.PORT || 5000, function() {
     console.log('Starting server');
@@ -76,6 +81,7 @@ server.listen(process.env.PORT || 5000, function() {
 // WebSocket handlers
 io.on('connection', function(socket) {
     var name = cookie.parse(socket.handshake.headers.cookie).name;
+    var currentRoom;
     socket.on('new player', function() {
         if (!players[name]) {
             players[name] = {
@@ -89,7 +95,6 @@ io.on('connection', function(socket) {
         console.log(players[name]);
 
         // Add player to room
-        var currentRoom;
         for (room in rooms) {
             if (players[name].room == room) {
                 console.log('room found.');
@@ -110,5 +115,11 @@ io.on('connection', function(socket) {
             // Tell client who's in the room
             io.to(currentRoom).emit('players', rooms[currentRoom].players);
         }
+    });
+
+    // Remove socket from the lobby
+    socket.on('leaveRoom',function(data) {
+        socket.leave(currentRoom);
+        console.log('socket no longer in room');
     });
 });

@@ -27,7 +27,13 @@
         <h2 style="margin-top: 0px;">PLAYERS</h2>
         <ul id="playersInRoom">
         </ul>
-        <button class="startButton">START</button>
+        <br><br>
+        <form action="/start" method="post">
+            <button class="startButton">START</button>
+        </form>
+        <!-- <form action="/leaveLobby" method="post"> -->
+            <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
+        <!-- </form> -->
     </div>
 
 
