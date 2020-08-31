@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 
 var players = {};
 var rooms = {};
-rooms['ABCD'] = {players:["p1","p2","p3"]};
+rooms['Lobby'] = {players:[]};
 
 // Routing
 app.get('/', function(req, res) {
@@ -49,13 +49,17 @@ app.get('/', function(req, res) {
 
 app.get('/join', function(req, res) {
     var name = req.query.nameInput;
+    if (players[name]) {
+        console.log("Name taken. Try again.");
+        res.sendFile(path.join(__dirname, 'landing_page.html'));
+    }
     console.log(name);
     // res.setHeader('Set-Cookie', ['name='+name])
     res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
     if (!players[name]) {
         players[name] = {
-            card: 'sampleCard',
-            room: 'ABCD',
+            card: 'None',
+            room: 'Lobby',
             isLeader: false,
             isHost: false
         }
@@ -64,8 +68,8 @@ app.get('/join', function(req, res) {
 });
 
 // Start the server
-server.listen(5000, function() {
-    console.log('Starting server on port 5000');
+server.listen(process.env.PORT || 5000, function() {
+    console.log('Starting server');
 });
 
 
@@ -76,7 +80,7 @@ io.on('connection', function(socket) {
         if (!players[name]) {
             players[name] = {
                 card: 'sampleCard',
-                room: 'ABCD',
+                room: 'Lobby',
                 isLeader: false,
                 isHost: false
             }
@@ -85,19 +89,26 @@ io.on('connection', function(socket) {
         console.log(players[name]);
 
         // Add player to room
-        var currentRoom = 'ABCD';
+        var currentRoom;
         for (room in rooms) {
             if (players[name].room == room) {
                 console.log('room found.');
-                rooms[room].players.push(name);
+                if (!rooms[room].players.includes(name)) {
+                    rooms[room].players.push(name);
+                }
                 currentRoom = room;
-                socket.join('ABCD');
+                socket.join(currentRoom);
                 console.log('room joined')
+                break;
             }
         }
-        
-        // Tell player who's in the room
-        io.to('ABCD').emit('players', 'teststr');//rooms[currentRoom].players.toString());
 
+        if (!currentRoom) {
+            console.log("Room not found.");
+        }
+        else {
+            // Tell client who's in the room
+            io.to(currentRoom).emit('players', rooms[currentRoom].players);
+        }
     });
 });
