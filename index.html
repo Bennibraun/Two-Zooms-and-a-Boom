@@ -41,6 +41,10 @@
             <div class="col-sm-4" style="border: 3px solid white; border-radius: 40px; background-color: #171717;">  
                 <h2>PLAYERS</h2>
                 <ul id="playersInRoom"></ul>
+                <form action="/start" method="post">
+                    <button class="startButton">START</button>
+                </form>
+                
             </div>
             <div class="col-sm-4">
                 <h2>ROUNDS</h2>
@@ -50,9 +54,6 @@
                 <h3>tacoman</h3>
             </div>
         </div>
-        <form action="/start" method="post">
-            <button class="startButton">START</button>
-        </form>
         <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
     </div>
 
