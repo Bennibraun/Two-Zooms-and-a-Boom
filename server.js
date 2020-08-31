@@ -58,6 +58,12 @@ app.get('/join', function(req, res) {
     if (players[name]) {
         console.log("Name taken. Try again.");
         res.sendFile(path.join(__dirname, 'landing_page.html'));
+        return;
+    }
+    if (!rooms[roomCode]) {
+        console.log("Room not found.");
+        res.sendFile(path.join(__dirname, 'landing_page.html'));
+        return;
     }
     console.log(name);
     res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
@@ -147,8 +153,13 @@ io.on('connection', function(socket) {
         }
         else {
             // Tell client who's in the room
+            socket.emit('yourName',name);
             io.to(currentRoom).emit('players', rooms[currentRoom].players);
             io.to(currentRoom).emit('roomCode',currentRoom);
+        }
+
+        if (players[name].isHost) {
+            socket.emit('host','');
         }
 
     });
@@ -163,6 +174,31 @@ io.on('connection', function(socket) {
         if (rooms[currentRoom]) {
             rooms[currentRoom].players = rooms[currentRoom].players.filter(function(p) {
                 if (p != name) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            });
+        }
+
+        // Update clients
+        io.to(currentRoom).emit('players', rooms[currentRoom].players);
+    });
+
+    socket.on('disconnect',function(reason) {
+        console.log("player disconnected.");
+        // if (reason === 'io client disconnect') {
+
+        // }
+    });
+
+    socket.on('removePlayer',function(playerName) {
+        delete players[playerName];
+        // Remove from room if in one
+        if (rooms[currentRoom]) {
+            rooms[currentRoom].players = rooms[currentRoom].players.filter(function(p) {
+                if (p != playerName) {
                     return true;
                 }
                 else {

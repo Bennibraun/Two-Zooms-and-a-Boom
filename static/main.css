@@ -84,8 +84,16 @@ label {
 ul {
     list-style-position: inside;
     color: white;
-    margin: 0;
+    margin: auto;
     padding: 10px;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-size: x-large;
+    width: 15%;
+    text-align: left;
+}
+
+.removePlayer {
+    color: red;
+    float: right;
+    cursor: pointer;
 }

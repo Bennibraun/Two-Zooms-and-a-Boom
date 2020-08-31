@@ -3,15 +3,46 @@
 // listens for messages on a specific channel
 var socket = io();
 
+var userName = '';
+var isHost = false;
+
+socket.on('host', function(data) {
+    console.log("user set as host.");
+    isHost = true;
+});
+
 socket.on('players', function(players) {    
     // console.log(players);
     
     // List all players in the room on the html list
     pList = $("#playersInRoom");
     pList.empty();
-    $.each(players,function(p) {
-        $('<li/>').text(players[p]).appendTo(pList);
-    });
+    if (isHost) {
+        $.each(players,function(p) {
+            $('<li/>').html(players[p]+'<span class="removePlayer">x</span><a class="playerName" style="display:none;">'+players[p]+'</a>').appendTo(pList);
+        });
+        $(".removePlayer").each(function() {
+            $(this).click(function() {
+                var playerToRemove = $(this).next().text();
+                socket.emit('removePlayer',playerToRemove);
+                console.log("removed " + playerToRemove);
+            });
+        });
+    }
+    else {
+        $.each(players,function(p) {
+            $('<li/>').text(players[p]).appendTo(pList);
+        });
+    }
+
+    if (!players.includes(userName)) {
+        console.log("this session has been removed.");
+        leaveLobby();
+    }
+});
+
+socket.on('yourName',function(name) {
+    userName = name;
 });
 
 socket.on('roomCode', function(roomCode) {
