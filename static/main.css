@@ -44,8 +44,9 @@ body {
 	cursor:pointer;
 	color:#ffffff;
     font-size: 30px; 
+}
 
-.startButton, .leaveButton {
+.leaveButton {
     color: white; 
     font-size: 20px; 
 
