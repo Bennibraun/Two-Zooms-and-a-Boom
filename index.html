@@ -40,10 +40,7 @@
             </div>
             <div class="col-sm-4" style="border: 3px solid white; border-radius: 40px; background-color: #171717;">  
                 <h2>PLAYERS</h2>
-                <h3>anthony</h3>
-                <h3>benni</h3>
-                <h3>b3nni69</h3>
-                <h3>tacoman</h3>
+                <ul id="playersInRoom"></ul>
             </div>
             <div class="col-sm-4">
                 <h2>ROUNDS</h2>
@@ -53,25 +50,11 @@
                 <h3>tacoman</h3>
             </div>
         </div>
-    </div>
-
-    <div style="margin-top: 10vh;">
-        <h1>TWO ZOOMS & A BOOM</h1>
-        <h2 style="font-size: xx-large;" id="roomCodeDisplay"></h2>
-    </div>
-
-    <div style="padding: 15px; border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 10vw; margin-left: 10vw;">
-        <h2 style="margin-top: 0px;">PLAYERS</h2>
-        <ul id="playersInRoom">
-        </ul>
-        <br><br>
         <form action="/start" method="post">
             <button class="startButton">START</button>
         </form>
         <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
     </div>
-
-
 
 </body>
 
