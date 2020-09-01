@@ -1,28 +1,26 @@
-h1 {   
+h1, h2, h3, h4, h5, h6 {
     font-family: Verdana, Geneva, sans-serif;
-    font-size: 40px;
     letter-spacing: -1px;
     word-spacing: 1px;
     color: white;
-    font-weight: 700;
-    text-decoration: none;
-    font-style: bold;
-    font-variant: normal;
-}
-
-h2 {   
-    font-family: Verdana, Geneva, sans-serif;
-    font-size: 40px;
-    letter-spacing: -1px;
-    word-spacing: 1px;
-    color: white;
-    font-weight: 700;
-    text-decoration: none;
     font-style: normal;
     font-variant: normal;
 }
 
+h1 {   
+    font-size: 40px;
+    font-weight: 700;
+    font-style: bold;
+    text-align: center;
+}
+
+h2 {   
+    font-size: 30px;
+    color: green;
+}
+
 h3 {
+    font-size: 25px;
     color: hotpink;
 }
 
@@ -33,6 +31,12 @@ div {
 
 body {
     background-color: #050505;
+}
+
+.whiteBorder {
+    border: 3px solid white; 
+    border-radius: 20px; 
+    background-color: #171717;
 }
 
 .startButton {
@@ -132,4 +136,9 @@ select {
 
 #styledSelect {
     left: 100px;
+}
+
+.cardImage {
+    width: 321 px;
+    height: 550 px;
 }
