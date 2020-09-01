@@ -3,17 +3,20 @@
 // listens for messages on a specific channel
 var socket = io();
 
+// Tell the server to instantiate a player
+socket.emit('new player');
+
 var userName = '';
 var isHost = false;
+var players;
 
 socket.on('host', function(data) {
     console.log("user set as host.");
     isHost = true;
 });
 
-socket.on('players', function(players) {    
-    // console.log(players);
-    
+socket.on('players', function(playerList) {
+    players = playerList;
     // List all players in the room on the html list
     pList = $("#playersInRoom");
     pList.empty();
@@ -41,6 +44,10 @@ socket.on('players', function(players) {
     }
 });
 
+socket.on('startingGame', function(playerList) {
+    players = playerList;
+});
+
 socket.on('yourName',function(name) {
     userName = name;
 });
@@ -53,8 +60,6 @@ socket.on('delete_cookie', (cookie) => {
     document.cookie = cookie + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 });
 
-// Tell the server to instantiate a player
-socket.emit('new player');
 
 // When leave btn pressed, tell server to leave lobby
 function leaveLobby() {

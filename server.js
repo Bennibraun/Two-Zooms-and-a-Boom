@@ -80,6 +80,12 @@ app.get('/join', function(req, res) {
     res.redirect('/');
 });
 
+app.get('/start',function(req,res) {
+    io.to(req.cookies.roomCode).emit('startingGame',players);
+
+    res.sendFile(path.join(__dirname, 'play.html'));
+});
+
 app.get('/host', function(req, res) {
     var name = req.query.nameInput;
     if (players[name]) {
@@ -184,13 +190,6 @@ io.on('connection', function(socket) {
 
         // Update clients
         io.to(currentRoom).emit('players', rooms[currentRoom].players);
-    });
-
-    socket.on('disconnect',function(reason) {
-        console.log("player disconnected.");
-        // if (reason === 'io client disconnect') {
-
-        // }
     });
 
     socket.on('removePlayer',function(playerName) {
