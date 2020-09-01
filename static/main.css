@@ -39,65 +39,46 @@ body {
     background-color: #171717;
 }
 
-.startButton {
+.startButton, .leaveButton {
 	box-shadow:inset 0px 1px 0px 0px #cf866c;
-	background-color:#a80000;
 	border-radius:3px;
-	border:1px solid #740000;
 	display:inline-block;
 	cursor:pointer;
 	color:#ffffff;
-    font-size: 30px; 
-}
-
-.leaveButton {
-    color: white; 
-    font-size: 20px; 
-
-    line-height: 20px;     
-    padding: 10px;
-    padding-right: 15px;
-    padding-left: 15px;
-    border-radius: 15px; 
-    font-family: Verdana, Geneva, sans-serif; 
-    font-weight: 700; text-decoration: none; 
-    font-style: normal; font-variant: normal; 
-    text-transform: uppercase; 
-
-	text-shadow:0px 1px 0px #7e0000;
-
-    background-image: linear-gradient(to right, rgb(28, 110, 164) 0%, rgb(35, 136, 203) 50%, rgb(20, 78, 117) 100%); 
-    box-shadow: rgb(0, 0, 0) 5px 5px 15px 5px; 
-    border: 2px solid rgb(28, 110, 164); 
-    display: inline-block;
+    font-size: 30px;
     outline: none;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.startButton {
+    background-color:#3c56a5;
+    border:1px solid #699fd5;
 }
 
 .leaveButton {
-    font-size: 15px;
-    background-image: linear-gradient(to right, rgb(164, 28, 28) 0%, rgb(203, 35, 35) 50%, rgb(117, 20, 20) 100%);
-    border: 2px solid rgb(164, 28, 28); 
-
+    background-color:#551414;
+    border:1px solid #ec1f2b;
 }
+
 .startButton:hover {
-	background-color:#750000;
+	background-color:#699fd5;
 }
 
 .startButton:active {
 	position:relative;
 	top:1px;
+    background: #699fd5; 
 }
 
 .leaveButton:hover {
-    background: #a41c1c; 
-}
-
-.startButton:active {
-    background: #144E75; 
+    background: #ec1f2b;
 }
 
 .leaveButton:active {
-    background: #751414; 
+    position: relative;
+    top: 1px;
+    background: #ec1f2b; 
 }
 
 label {
@@ -138,7 +119,37 @@ select {
     left: 100px;
 }
 
-.cardImage {
-    width: 321 px;
-    height: 550 px;
+#searchCardsInput {
+    background-image: url('/css/searchicon.png');
+    background-position: 10px 12px;
+    background-repeat: no-repeat;
+    width: 100%;
+    font-size: 16px;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #ddd;
+    margin-bottom: 12px;
+}
+
+#cardsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width:100%;
+}
+
+
+#cardsList li {
+    display: inline-block;
+    border: 1px solid #ddd;
+    margin-top: -1px;
+    background-color: #f6f6f6;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 25px;
+    color: black;
+    display: block;
+}
+
+#cardsList li a:hover:not(.header) {
+    background-color: #eee;
 }
