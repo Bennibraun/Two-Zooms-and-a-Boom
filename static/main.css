@@ -121,3 +121,15 @@ ul {
     float: right;
     cursor: pointer;
 }
+
+select {
+    position: relative;
+}
+
+.blueText {
+    color: blue;
+}
+
+#styledSelect {
+    left: 100px;
+}
