@@ -17,31 +17,50 @@
 </head>
 
 <body>
-    <div style="margin: auto; margin-top: 10vh;">
+    <div>
         <h1 style="text-align: center;">TWO ZOOMS & A BOOM</h1>
     </div>
 
-    <div class="container" style="border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 10vw; margin-left: 10vw; padding: 10px;">
-        <h2 style="font-size: x-large;">Join a game</h2>
-        <form action="/join/" method="get">
-            <label for="nameInput">Name</label>
-            <input id="nameInput" name="nameInput">
-            <a>&nbsp;&nbsp;&nbsp;</a>
-            <label for="joinCodeInput">Join Code</label>
-            <input id="joinCodeInput" name="joinCodeInput">
-            <input id="submitBtn" type="submit"></button>
-        </form>
-    </div>
-    
-    <div class="container" style="border: 3px solid white; border-radius: 40px; margin-top: 5vh; margin-right: 10vw; margin-left: 10vw; padding: 20px;">
-        <h2 style="font-size:x-large;">Host a game</h2>
-        <form action="/host/" method="get">
-            <label for="nameInput">Name</label>
-            <input id="nameInput" name="nameInput">
-            <input id="submitBtn" type="submit"></button>
-        </form>
+    <div class="container">
+        <div class="row">
+            
+            <div class="col"></div>
+            
+            <div class="col-sm-auto" style="border: 3px solid white; border-radius: 20px; background-color: #171717; margin-left: 10px; margin-right: 10px;">  
+                <h2 style="font-size: x-large;">Join a game</h2>
+                <form action="/join/" method="get">
+                    <label for="nameInput">Name</label>
+                    <input id="nameInput" name="nameInput">
+                    <a>&nbsp;&nbsp;&nbsp;</a>
+                    <label for="joinCodeInput">Join Code</label>
+                    <input id="joinCodeInput" name="joinCodeInput">
+                    <input id="submitBtn" type="submit"></button>
+                </form>
+            </div>
+
+            <div class="col"></div>
+
+        </div>
     </div>
 
+    <div class="container">
+        <div class="row">
+            
+            <div class="col"></div>
+            
+            <div class="col-sm-auto" style="border: 3px solid white; border-radius: 20px; background-color: #171717; margin-left: 10px; margin-right: 10px;">  
+                <h2 style="font-size:x-large;">Host a game</h2>
+                <form action="/host/" method="get">
+                <label for="nameInput">Name</label>
+                <input id="nameInput" name="nameInput">
+                <input id="submitBtn" type="submit"></button>
+                </form>
+            </div>
+
+            <div class="col"></div>
+
+        </div>
+    </div>
 
 </body>
 </HTML>
