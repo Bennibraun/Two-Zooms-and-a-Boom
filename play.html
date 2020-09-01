@@ -18,34 +18,46 @@
 </head>
 
 <body>
-
-    <div style="margin-top: 30px;"></div>
-
-    <div class="container">
-        <div class="row">
+    <div class="container-fluid px-0">
+        <div class="row imagetiles">
             <div class="col-sm-12">
                 <h1 style="font-size: 50px; border: 3px solid white; border-radius: 20px; background-color: #171717; max-width: 600px; margin: auto;">TIMER</h1>
             </div>
         </div>
 
         <div class="row">
-            <div class="col-sm mr-auto">
+            <div class="col-sm-4">
                 <!-- Yo Anthony, this will be where we put the left card that belongs to the user. I'll fill this in as an <img> using javascript. -->
-                <div style="text-align: left">
-                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px;" />
+                <div>
+                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 40vw; margin-left: 10px;" />
+                </div>
+                <div>
+                    <h1>YOUR CARD</h1>
                 </div>
             </div>
-
-            <div class="col-sm">
+            <div class="col-sm-4 whiteBorder" style="margin-top: 5%;">           
+                <h1>PLAYERS</h2>
+                <h3 id="roomCodeDisplay"></h3>
+                <ul id="playersInRoom"></ul>
+            </div>
+            <div class="col-sm-4">
                 <!-- Yo Anthony, this will be where we put the left card that belongs to the user. I'll fill this in as an <img> using javascript. -->
-                <div style="text-align: right">
-                    <img id="shareCardImg" src="/static/cards/bomber_red.jpg" style="max-width: 400px;" />
+                <div>
+                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 40vw; margin-right: 10px;" />
+                </div>
+                <div>
+                    <h1>TARGET'S CARD</h1>
                 </div>
             </div>
         </div>
     </div>
 </body>
 
+<style>
+    div.imagetiles div.col-lg-3.col-md-3.col-sm-3.col-xs-6{
+    padding: 0px;
+  }
+</style>
 
 <script src="/static/game.js"></script>
 
