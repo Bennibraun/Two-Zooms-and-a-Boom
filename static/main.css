@@ -131,18 +131,21 @@ select {
 }
 
 #cardsList {
-    list-style-type: none;
+    list-style: none;
     padding: 0;
     margin: 0;
+    width:100%;
 }
 
-#cardsList li a {
+
+#cardsList li {
+    display: inline-block;
     border: 1px solid #ddd;
     margin-top: -1px;
     background-color: #f6f6f6;
     padding: 12px;
     text-decoration: none;
-    font-size: 18px;
+    font-size: 25px;
     color: black;
     display: block;
 }

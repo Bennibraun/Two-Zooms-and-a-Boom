@@ -84,9 +84,7 @@
 
                 // Loop through all list items, and hide those who don't match the search query
                 for (i = 0; i < li.length; i++) {
-                    console.log(a[i].text);
                     txtValue = a[i].text;
-                    console.log(li[i])
                     if (txtValue.toUpperCase().indexOf(filter) > -1) {
                         li[i].style.display = "";
                     } else {
@@ -99,15 +97,104 @@
         <input type="text" id="searchCardsInput" onkeyup="cardSearch()" placeholder="Search for a card...">
 
         <ul id="cardsList">
-            <li><a href="#">Adele</a></li>
-            <li><a href="#">Agnes</a></li>
-
-            <li><a href="#">Billy</a></li>
-            <li><a href="#">Bob</a></li>
-
-            <li><a href="#">Calvin</a></li>
-            <li><a href="#">Christina</a></li>
-            <li><a href="#">Cindy</a></li>
+            <li><img src="/static/cards/agent_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agent (Blue)</a></li>
+            <li><img src="/static/cards/agent_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agent (Red)</a></li>
+            <li><img src="/static/cards/agoraphobe.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agoraphobe</a></li>
+            <li><img src="/static/cards/ahab.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Ahab</a></li>
+            <li><img src="/static/cards/ambassador_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Ambassador (Blue)</a></li>
+            <li><img src="/static/cards/ambassador_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Ambassador (Red)</a></li>
+            <li><img src="/static/cards/anarchist.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Anarchist</a></li>
+            <li><img src="/static/cards/angel_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Angel (Blue)</a></li>
+            <li><img src="/static/cards/angel_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Angel (Red)</a></li>
+            <li><img src="/static/cards/blind_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Blind (Blue)</a></li>
+            <li><img src="/static/cards/blind_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Blind (Red)</a></li>
+            <li><img src="/static/cards/bluespy_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Blue Spy (Red)</a></li>
+            <li><img src="/static/cards/bombbot.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Bomb Bot</a></li>
+            <li><img src="/static/cards/bomber_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Bomber (Red)</a></li>
+            <li><img src="/static/cards/bouncer_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Bouncer (Blue)</a></li>
+            <li><img src="/static/cards/bouncer_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Bouncer (Red)</a></li>
+            <li><img src="/static/cards/butler.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Butler</a></li>
+            <li><img src="/static/cards/clone.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Clone</a></li>
+            <li><img src="/static/cards/clown_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Clown (Blue)</a></li>
+            <li><img src="/static/cards/clown_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Clown (Red)</a></li>
+            <li><img src="/static/cards/conman_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Conman (Blue)</a></li>
+            <li><img src="/static/cards/conman_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Conman (Red)</a></li>
+            <li><img src="/static/cards/coyboy_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Coyboy (Blue)</a></li>
+            <li><img src="/static/cards/coyboy_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Coyboy (Red)</a></li>
+            <li><img src="/static/cards/criminal_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Criminal (Blue)</a></li>
+            <li><img src="/static/cards/criminal_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Criminal (Red)</a></li>
+            <li><img src="/static/cards/cupid_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Cupid (Red)</a></li>
+            <li><img src="/static/cards/dealer_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Dealer (Blue)</a></li>
+            <li><img src="/static/cards/dealer_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Dealer (Red)</a></li>
+            <li><img src="/static/cards/decoy.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Decoy</a></li>
+            <li><img src="/static/cards/default_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Blue Team</a></li>
+            <li><img src="/static/cards/default_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Red Team</a></li>
+            <li><img src="/static/cards/demon_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Demon (Blue)</a></li>
+            <li><img src="/static/cards/demon_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Demon (Red)</a></li>
+            <li><img src="/static/cards/doctor_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Doctor (Blue)</a></li>
+            <li><img src="/static/cards/drboom_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Dr. Boom (Red)</a></li>
+            <li><img src="/static/cards/drunk.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Drunk</a></li>
+            <li><img src="/static/cards/enforcer_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Enforcer (Blue)</a></li>
+            <li><img src="/static/cards/enforcer_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Enforcer (Red)</a></li>
+            <li><img src="/static/cards/engineer_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Engineer (Red)</a></li>
+            <li><img src="/static/cards/eris_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Eris (Blue)</a></li>
+            <li><img src="/static/cards/gambler.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Gambler</a></li>
+            <li><img src="/static/cards/hotpotato.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Hot Potato</a></li>
+            <li><img src="/static/cards/immunologist_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Immunologist (Red)</a></li>
+            <li><img src="/static/cards/intern.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Intern</a></li>
+            <li><img src="/static/cards/invincible.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Invincible</a></li>
+            <li><img src="/static/cards/juliet.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Juliet</a></li>
+            <li><img src="/static/cards/leprechaun_green.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Leprechaun (Green)</a></li>
+            <li><img src="/static/cards/maid.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Maid</a></li>
+            <li><img src="/static/cards/martyr_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Martyr (Red)</a></li>
+            <li><img src="/static/cards/mastermind.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mastermind</a></li>
+            <li><img src="/static/cards/mayor_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mayor (Blue)</a></li>
+            <li><img src="/static/cards/mayor_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mayor (Red)</a></li>
+            <li><img src="/static/cards/medic_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Medic (Blue)</a></li>
+            <li><img src="/static/cards/medic_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Medic (Red)</a></li>
+            <li><img src="/static/cards/mi6.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">MI6</a></li>
+            <li><img src="/static/cards/mime_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mime (Blue)</a></li>
+            <li><img src="/static/cards/mime_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mime (Red)</a></li>
+            <li><img src="/static/cards/minion.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Minion</a></li>
+            <li><img src="/static/cards/mistress.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mistress</a></li>
+            <li><img src="/static/cards/moby.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Moby</a></li>
+            <li><img src="/static/cards/mummy_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mummy (Blue)</a></li>
+            <li><img src="/static/cards/mummy_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Mummy (Red)</a></li>
+            <li><img src="/static/cards/negotiator_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Negotiator (Blue)</a></li>
+            <li><img src="/static/cards/negotiator_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Negotiator (Red)</a></li>
+            <li><img src="/static/cards/nucleartyrant.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Nuclear Tyrant</a></li>
+            <li><img src="/static/cards/nurse_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Nurse (Blue)</a></li>
+            <li><img src="/static/cards/paparazzo_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Paparazzo (Blue)</a></li>
+            <li><img src="/static/cards/paparazzo_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Paparazzo (Red)</a></li>
+            <li><img src="/static/cards/paranoid_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Paranoid (Blue)</a></li>
+            <li><img src="/static/cards/paranoid_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Paranoid (Red)</a></li>
+            <li><img src="/static/cards/president_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">President (Blue)</a></li>
+            <li><img src="/static/cards/presidentsdaughter_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">President's Daughter (Blue)</a></li>
+            <li><img src="/static/cards/privateeye.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Private Eye</a></li>
+            <li><img src="/static/cards/psychologist_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Psychologist (Blue)</a></li>
+            <li><img src="/static/cards/psychologist_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Psychologist (Red)</a></li>
+            <li><img src="/static/cards/queen.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Queen</a></li>
+            <li><img src="/static/cards/redspy_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Red Spy (Blue)</a></li>
+            <li><img src="/static/cards/rival.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Rival</a></li>
+            <li><img src="/static/cards/robot.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Robot</a></li>
+            <li><img src="/static/cards/romeo.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Romeo</a></li>
+            <li><img src="/static/cards/security_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Security (Blue)</a></li>
+            <li><img src="/static/cards/security_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Security (Red)</a></li>
+            <li><img src="/static/cards/shyguy_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Shyguy (Blue)</a></li>
+            <li><img src="/static/cards/shyguy_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Shyguy (Red)</a></li>
+            <li><img src="/static/cards/sniper.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Sniper</a></li>
+            <li><img src="/static/cards/survivor.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Survivor</a></li>
+            <li><img src="/static/cards/target.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Target</a></li>
+            <li><img src="/static/cards/thug_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Thug (Blue)</a></li>
+            <li><img src="/static/cards/thug_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Thug (Red)</a></li>
+            <li><img src="/static/cards/tinkerer_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Tinkerer (Red)</a></li>
+            <li><img src="/static/cards/traveler.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Traveler</a></li>
+            <li><img src="/static/cards/tuesdayknight_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Tuesday Knight (Blue)</a></li>
+            <li><img src="/static/cards/usurper_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Usurper (Blue)</a></li>
+            <li><img src="/static/cards/usurper_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Usurper (Red)</a></li>
+            <li><img src="/static/cards/victim.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Victim</a></li>
+            <li><img src="/static/cards/wife.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Wife</a></li>
+            <li><img src="/static/cards/zombie_green.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Zombie (Green)</a></li>
         </ul>
 
 
