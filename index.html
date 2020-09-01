@@ -67,10 +67,50 @@
 
             </div>
         </div>
-        <form action="/start" method="get">
+        <form action="/play" method="get">
             <button class="startButton">START</button>
         </form>
         <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
+    </div>
+
+    <div id="hostCardSelection" class="container" style="">
+
+        <script>
+            function cardSearch() {
+                var input, filter, ul, li, a, i, txtValue;
+                filter = $('#searchCardsInput').val().toUpperCase();
+                li = $('#cardsList li');
+                a = li.children('a');
+
+                // Loop through all list items, and hide those who don't match the search query
+                for (i = 0; i < li.length; i++) {
+                    console.log(a[i].text);
+                    txtValue = a[i].text;
+                    console.log(li[i])
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        li[i].style.display = "";
+                    } else {
+                        li[i].style.display = "none";
+                    }
+                }
+            }
+        </script>
+
+        <input type="text" id="searchCardsInput" onkeyup="cardSearch()" placeholder="Search for a card...">
+
+        <ul id="cardsList">
+            <li><a href="#">Adele</a></li>
+            <li><a href="#">Agnes</a></li>
+
+            <li><a href="#">Billy</a></li>
+            <li><a href="#">Bob</a></li>
+
+            <li><a href="#">Calvin</a></li>
+            <li><a href="#">Christina</a></li>
+            <li><a href="#">Cindy</a></li>
+        </ul>
+
+
     </div>
 
 </body>

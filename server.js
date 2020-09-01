@@ -39,8 +39,17 @@ app.get('/', function(req, res) {
         console.log(req.cookies);
         var name = req.cookies.name;
         if (name != undefined) {
-            console.log("user identified as " + name + ". Proceeding to index.");
-            res.sendFile(path.join(__dirname, 'index.html'));
+            if (!players[name]) {
+                // Delete cookies, reset
+                console.log("resetting player");
+                res.cookie('name',name, { expires: new Date(Date.now()-1) });
+                res.cookie('roomCode', roomCode, { expires: new Date(Date.now()-1) });
+                res.sendFile(path.join(__dirname, 'landing_page.html'));
+            }
+            else {
+                console.log("user identified as " + name + ". Proceeding to index.");
+                res.sendFile(path.join(__dirname, 'index.html'));
+            }
             return;
         }
         else {
@@ -80,8 +89,12 @@ app.get('/join', function(req, res) {
     res.redirect('/');
 });
 
-app.get('/start',function(req,res) {
-    io.to(req.cookies.roomCode).emit('startingGame',players);
+app.get('/play',function(req,res) {
+    var roomCode = req.cookies.roomCode;
+    if (!rooms[roomCode].started) {
+        io.to(roomCode).emit('startingGame',players);
+        rooms[roomCode].started = true;
+    }
 
     res.sendFile(path.join(__dirname, 'play.html'));
 });
@@ -189,7 +202,9 @@ io.on('connection', function(socket) {
         }
 
         // Update clients
-        io.to(currentRoom).emit('players', rooms[currentRoom].players);
+        if (rooms[currentRoom]) {
+            io.to(currentRoom).emit('players', rooms[currentRoom].players);
+        }
     });
 
     socket.on('removePlayer',function(playerName) {

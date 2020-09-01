@@ -46,6 +46,7 @@ socket.on('players', function(playerList) {
 
 socket.on('startingGame', function(playerList) {
     players = playerList;
+    $(".startButton").click();
 });
 
 socket.on('yourName',function(name) {
