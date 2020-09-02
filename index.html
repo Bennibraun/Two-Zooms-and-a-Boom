@@ -26,17 +26,27 @@
         <div class="row">
 
             <!-- SETUP column -->
-            <div class="col-sm-4 whiteBorder">  
+            <div class="col-sm-4 whiteBorder" style="height: 80%;">  
                 <h1>SETUP</h2>
 
-                <!-- Playing with select -->
+                <!-- Playing with select
                 <select id="styledSelect" class="blueText">
                     <option value="apple">Apple</option>
                     <option value="orange">Orange</option>
                     <option value="cherry">Cherry</option>
                 </select>
+                 -->
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h1>CARDS IN PLAY</h1>
+                    </div>
+                    <div class="col-sm-6 whiteBorder">
+                        <h1>ACTUAL CARD LIST</h1>
+                    </div>
+                </div>
 
-                <div id="hostCardSelection" class="container" style="overflow: auto;">
+
+                <div id="hostCardSelection" class="container" style="width: 100%;">
 
                     <script>
                         function cardSearch() {
@@ -59,7 +69,7 @@
             
                     <input type="text" id="searchCardsInput" onkeyup="cardSearch()" placeholder="Search for a card...">
             
-                    <ul id="cardsList">
+                    <ul id="cardsList" style="overflow: auto; max-height: 50%;">
                         <li><img src="/static/cards/agent_blue.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agent (Blue)</a></li>
                         <li><img src="/static/cards/agent_red.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agent (Red)</a></li>
                         <li><img src="/static/cards/agoraphobe.jpg" style="height:150px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#">Agoraphobe</a></li>
