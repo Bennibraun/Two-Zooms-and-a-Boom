@@ -28,10 +28,112 @@ Object.filter = (obj, predicate) =>
           .filter( key => predicate(obj[key]) )
           .reduce( (res, key) => (res[key] = obj[key], res), {} );
 
-
+// Global vars
 var players = {};
+var cards = {};
 var rooms = {};
-rooms['Lobby'] = {players:[]};
+
+// Declare cards
+cards['agent_blue'] = {name:"Agent (Blue)", color:"blue"};
+cards['ambassador_blue'] = {name:"Ambassador (Blue)", color:"blue"};
+cards['angel_blue'] = {name:"Angel (Blue)", color:"blue"};
+cards['blind_blue'] = {name:"Blind (Blue)", color:"blue"};
+cards['bouncer_blue'] = {name:"Bouncer (Blue)", color:"blue"};
+cards['clown_blue'] = {name:"Clown (Blue)", color:"blue"};
+cards['conman_blue'] = {name:"Conman (Blue)", color:"blue"};
+cards['coyboy_blue'] = {name:"Coyboy (Blue)", color:"blue"};
+cards['criminal_blue'] = {name:"Criminal (Blue)", color:"blue"};
+cards['dealer_blue'] = {name:"Dealer (Blue)", color:"blue"};
+cards['default_blue'] = {name:"Blue Team", color:"blue"};
+cards['demon_blue'] = {name:"Demon (Blue)", color:"blue"};
+cards['doctor_blue'] = {name:"Doctor (Blue)", color:"blue"};
+cards['enforcer_blue'] = {name:"Enforcer (Blue)", color:"blue"};
+cards['eris_blue'] = {name:"Eris (Blue)", color:"blue"};
+cards['mayor_blue'] = {name:"Mayor (Blue)", color:"blue"};
+cards['medic_blue'] = {name:"Medic (Blue)", color:"blue"};
+cards['mime_blue'] = {name:"Mime (Blue)", color:"blue"};
+cards['mummy_blue'] = {name:"Mummy (Blue)", color:"blue"};
+cards['negotiator_blue'] = {name:"Negotiator (Blue)", color:"blue"};
+cards['nurse_blue'] = {name:"Nurse (Blue)", color:"blue"};
+cards['paparazzo_blue'] = {name:"Paparazzo (Blue)", color:"blue"};
+cards['paranoid_blue'] = {name:"Paranoid (Blue)", color:"blue"};
+cards['president_blue'] = {name:"President (Blue)", color:"blue"};
+cards['presidentsdaughter_blue'] = {name:"President's Daughter (Blue)", color:"blue"};
+cards['psychologist_blue'] = {name:"Psychologist (Blue)", color:"blue"};
+cards['redspy_blue'] = {name:"Red Spy (Blue)", color:"blue"};
+cards['security_blue'] = {name:"Security (Blue)", color:"blue"};
+cards['shyguy_blue'] = {name:"Shyguy (Blue)", color:"blue"};
+cards['thug_blue'] = {name:"Thug (Blue)", color:"blue"};
+cards['tuesdayknight_blue'] = {name:"Tuesday Knight (Blue)", color:"blue"};
+cards['usurper_blue'] = {name:"Usurper (Blue)", color:"blue"};
+cards['ambassador_red'] = {name:"Ambassador (Red)", color:"red"};
+cards['angel_red'] = {name:"Angel (Red)", color:"red"};
+cards['bluespy_red'] = {name:"Blue Spy (Red)", color:"red"};
+cards['bomber_red'] = {name:"Bomber (Red)", color:"red"};
+cards['blind_red'] = {name:"Blind (Red)", color:"red"};
+cards['bouncer_red'] = {name:"Bouncer (Red)", color:"red"};
+cards['clown_red'] = {name:"Clown (Red)", color:"red"};
+cards['blind_red'] = {name:" (Red)", color:"red"};
+cards['conman_red'] = {name:"Conman (Red)", color:"red"};
+cards['coyboy_red'] = {name:"Coyboy (Red)", color:"red"};
+cards['criminal_red'] = {name:"Criminal (Red)", color:"red"};
+cards['cupid_red'] = {name:"Cupid (Red)", color:"red"};
+cards['dealer_red'] = {name:"Dealer (Red)", color:"red"};
+cards['default_red'] = {name:"Red Team", color:"red"};
+cards['demon_red'] = {name:"Demon (Red)", color:"red"};
+cards['drboom_red'] = {name:"Dr. Boom (Red)", color:"red"};
+cards['enforcer_red'] = {name:"Enforcer (Red)", color:"red"};
+cards['engineer_red'] = {name:"Engineer (Red)", color:"red"};
+cards['immunologist_red'] = {name:"Immunologist (Red)", color:"red"};
+cards['martyr_red'] = {name:"Martyr (Red)", color:"red"};
+cards['mayor_red'] = {name:"Mayor (Red)", color:"red"};
+cards['medic_red'] = {name:"Medic (Red)", color:"red"};
+cards['mime_red'] = {name:"Mime (Red)", color:"red"};
+cards['mummy_red'] = {name:"Mummy (Red)", color:"red"};
+cards['negotiator_red'] = {name:"Negotiator (Red)", color:"red"};
+cards['paparazzo_red'] = {name:"Paparazzo (Red)", color:"red"};
+cards['paranoid_red'] = {name:"Paranoid (Red)", color:"red"};
+cards['psychologist_red'] = {name:"Psychologist (Red)", color:"red"};
+cards['security_red'] = {name:"Security (Red)", color:"red"};
+cards['shyguy_red'] = {name:"Shyguy (Red)", color:"red"};
+cards['thug_red'] = {name:"Thug (Red)", color:"red"};
+cards['tinkerer_red'] = {name:"Tinkerer (Red)", color:"red"};
+cards['usurper_red'] = {name:"Usurper (Red)", color:"red"};
+cards['agoraphobe'] = {name:"Agoraphobe", color:"grey"};
+cards['ahab'] = {name:"Ahab", color:"grey"};
+cards['anarchist'] = {name:"", color:"grey"};
+cards['bombbot'] = {name:"Bomb Bot", color:"grey"};
+cards['butler'] = {name:"Butler", color:"grey"};
+cards['clone'] = {name:"Clone", color:"grey"};
+cards['decoy'] = {name:"Decoy", color:"grey"};
+cards['drunk'] = {name:"Drunk", color:"grey"};
+cards['gambler'] = {name:"Gambler", color:"grey"};
+cards['hotpotato'] = {name:"Hot Potato", color:"grey"};
+cards['intern'] = {name:"Intern", color:"grey"};
+cards['invincible'] = {name:"Invincible", color:"grey"};
+cards['juliet'] = {name:"Juliet", color:"grey"};
+cards['leprechaun_green'] = {name:"Leprechaun (Green)", color:"green"};
+cards['maid'] = {name:"Maid", color:"grey"};
+cards['mastermind'] = {name:"Mastermind", color:"grey"};
+cards['mi6'] = {name:"MI6", color:"grey"};
+cards['minion'] = {name:"Minion", color:"grey"};
+cards['mistress'] = {name:"Mistress", color:"grey"};
+cards['moby'] = {name:"Moby", color:"grey"};
+cards['nucleartyrant'] = {name:"Nuclear Tyrant", color:"grey"};
+cards['privateeye'] = {name:"Private Eye", color:"grey"};
+cards['queen'] = {name:"Queen", color:"grey"};
+cards['rival'] = {name:"Rival", color:"grey"};
+cards['robot'] = {name:"Robot", color:"grey"};
+cards['romeo'] = {name:"Romeo", color:"grey"};
+cards['sniper'] = {name:"Sniper", color:"grey"};
+cards['survivor'] = {name:"Survivor", color:"grey"};
+cards['target'] = {name:"Target", color:"grey"};
+cards['traveler'] = {name:"Traveler", color:"grey"};
+cards['victim'] = {name:"Victim", color:"grey"};
+cards['wife'] = {name:"Wife", color:"grey"};
+cards['zombie_green'] = {name:"Zombie (Green)", color:"green"};
+
+
 
 // Routing
 app.get('/', function(req, res) {
