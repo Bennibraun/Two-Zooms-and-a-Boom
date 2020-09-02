@@ -39,6 +39,12 @@ body {
     background-color: #171717;
 }
 
+.redBorder {
+    border: 3px solid red; 
+    border-radius: 20px; 
+    background-color: #171717;
+}
+
 .startButton, .leaveButton {
 	box-shadow:inset 0px 1px 0px 0px #cf866c;
 	border-radius:3px;
