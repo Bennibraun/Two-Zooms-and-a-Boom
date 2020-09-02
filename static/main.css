@@ -153,3 +153,16 @@ select {
 #cardsList li a:hover:not(.header) {
     background-color: #eee;
 }
+
+
+*::-webkit-scrollbar {
+    width: 5px;
+}
+*::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0);
+}
+*::-webkit-scrollbar-thumb {
+    background-color: white;
+    border-radius: 20px;
+    border: none;
+}
