@@ -285,6 +285,9 @@ io.on('connection', function(socket) {
         if (players[name].isHost) {
             socket.emit('host','');
         }
+        else {
+            socket.emit('isPlayer','')
+        }
 
     });
 

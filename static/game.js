@@ -19,6 +19,12 @@ socket.on('host', function(data) {
     $("#hostCardSelection").css("display","block");
 });
 
+socket.on('isPlayer',function(isPlayer) {
+    isHost = false;
+    $("#cardSetupBottom").remove();
+    $("#cardPreviewRow").css("height","90%");
+});
+
 socket.on('players', function(playerList) {
     players = playerList;
     // List all players in the room on the html list
