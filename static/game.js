@@ -122,6 +122,16 @@ function drawCards() {
         $(".card").unbind('click').click(function() {
             deselectCard($(this).children("img")[0].getAttribute("src"));
         });
+        console.log('cards: '+Object.keys(cardsInPlay['cards']).length+', players: '+players.length);
+        if (Object.keys(cardsInPlay['cards']).length < players.length) {
+            $("#numCards").text("Still need " + (players.length-Object.keys(cardsInPlay['cards']).length).toString() + " cards");
+        }
+        else if (Object.keys(cardsInPlay['cards']).length > players.length) {
+            $("#numCards").text("You've selected " + (Object.keys(cardsInPlay['cards']).length-players.length).toString() + " too many cards!");
+        }
+        else {
+            $("#numCards").text("Card selection is balanced!");
+        }
     }
 }
 
