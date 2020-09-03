@@ -126,29 +126,36 @@ select {
 }
 
 #searchCardsInput {
-    background-image: url('/css/searchicon.png');
-    background-position: 10px 12px;
-    background-repeat: no-repeat;
     width: 100%;
     font-size: 16px;
-    padding: 12px 20px 12px 40px;
-    border: 1px solid #ddd;
-    margin-bottom: 12px;
+    padding: 12px 20px 12px 20px;
+    background-color: #3b3b3b;
+    color: white;
+    margin-bottom: 6px;
+    outline: none;
+    border-radius: 5px;
+    border: none;
+}
+#searchCardsInput::placeholder {
+    color: white;
 }
 
 #cardsList {
     list-style: none;
     padding: 0;
     margin: 0;
-    width:100%;
+    width: 100%;
+    background-color: #3b3b3b;
+    border-radius: 5px;
 }
 
 
 #cardsList li {
     display: inline-block;
     border: 1px solid #ddd;
+    border-right: none;
+    border-left: none;
     margin-top: -1px;
-    background-color: #f6f6f6;
     padding: 12px;
     text-decoration: none;
     font-size: 25px;
@@ -156,8 +163,8 @@ select {
     display: block;
 }
 
-#cardsList li a:hover:not(.header) {
-    background-color: #eee;
+#cardsList li:hover:not(.header) {
+    background-color: #868686;
 }
 
 .card-grid {
@@ -167,13 +174,12 @@ select {
 }
 
 .card {
-    /* padding: 10px; */
+    padding: 5px;
     width: 100%;
     min-width: 50px;
-    max-width: 200px;
-    border: 1px solid white;
+    max-width: 100px;
     margin: auto;
-    background: gold;
+    margin-top: 0px;
 }
 
 *::-webkit-scrollbar {
@@ -186,4 +192,50 @@ select {
     background-color: white;
     border-radius: 20px;
     border: none;
+}
+
+.cardListImg {
+    height: 100px;
+}
+
+.cardPreviewImg {
+    width: 100%;
+    border-radius: 5px;
+}
+
+.cardDelete {
+    display:none;
+    position:absolute;
+    top:42px;
+    left:25px;
+    width: 50%;
+}
+
+.card:hover .cardPreviewImg {
+    opacity: 0.5;
+}
+.card:hover .cardDelete {
+    display:block !important;
+}
+
+#hostCardSelection {
+    display:none;
+}
+
+.setup a {
+    text-decoration: none;
+    color: white;
+}
+
+.setup a:hover {
+    color: white;
+}
+
+.unselectable {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

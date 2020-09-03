@@ -218,7 +218,7 @@ app.get('/host', function(req, res) {
 
     io.to(roomCode).emit('roomCode',roomCode);
 
-    rooms[roomCode] = {players:[name]};
+    rooms[roomCode] = {players:[name], cardsInPlay:{}};
 
     if (!players[name]) {
         players[name] = {
@@ -277,6 +277,9 @@ io.on('connection', function(socket) {
             socket.emit('yourName',name);
             io.to(currentRoom).emit('players', rooms[currentRoom].players);
             io.to(currentRoom).emit('roomCode',currentRoom);
+            if (rooms[currentRoom].cardsInPlay['cards']) {
+                io.to(currentRoom).emit('cards',rooms[currentRoom].cardsInPlay);
+            }
         }
 
         if (players[name].isHost) {
@@ -325,5 +328,13 @@ io.on('connection', function(socket) {
 
         // Update clients
         io.to(currentRoom).emit('players', rooms[currentRoom].players);
+    });
+
+    socket.on('update cards',function(cardsInPlay) {
+        room = cardsInPlay['room'];
+        // Update server-side cards
+        rooms[room].cardsInPlay = cardsInPlay;
+        // Inform clients of card selection
+        io.to(room).emit('cards',cardsInPlay);
     });
 });
