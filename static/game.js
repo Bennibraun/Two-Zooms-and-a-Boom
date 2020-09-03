@@ -140,10 +140,14 @@ function deselectCard(src) {
     var card = $(".card").filter(function() {
         return $(this).children("img")[0].getAttribute("src") == src;
     });
-    console.log(card);
-    delete cardsInPlay['cards'][$(card[0]).children("a")[0].text];
+    cardName = $(card[0]).children("a")[0].text;
+    delete cardsInPlay['cards'][cardName];
     card[0].remove();
     socket.emit('update cards',cardsInPlay);
+    var li = $("#cardsList li").filter(function() {
+        return $(this).children("a")[0].text == cardName;
+    });
+    li.css("background-color","#3b3b3b");
 }
 
 
