@@ -16,6 +16,8 @@
 </head>
 
 <body>
+    <script src="/socket.io/socket.io.js"></script>
+
     <div>
         <h1>TWO ZOOMS & A BOOM</h1>
     </div>
@@ -36,6 +38,11 @@
                     <input id="joinCodeInput" name="joinCodeInput">
                     <input id="submitBtn" type="submit"></button>
                 </form>
+
+                <script>
+                    var roomCode = document.cookie.split('; ').find(row => row.startsWith('roomCode')).split('=')[1];
+                    $("#joinCodeInput").val(roomCode);
+                </script>
 
             </div>
         </div>

@@ -239,3 +239,25 @@ select {
     -ms-user-select: none;
     user-select: none;
 }
+
+#playersInRoom {
+    width: fit-content;
+}
+
+P {
+    color: white;
+    margin: 0px;
+}
+
+#joinLink {
+    width: 100%;
+    background-color: #171717;
+    outline: none;
+    resize: none;
+    border: none;
+    font-size: 25;
+    color: white;
+    margin: auto;
+    text-align: center;
+    height: 50px;
+}

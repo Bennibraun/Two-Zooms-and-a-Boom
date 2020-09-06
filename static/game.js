@@ -11,6 +11,7 @@ var isHost = false;
 var players;
 var cardsInPlay = {room:"",cards:{}};
 
+
 socket.on('host', function(data) {
     console.log("user set as host.");
     isHost = true;
@@ -31,8 +32,13 @@ socket.on('players', function(playerList) {
     pList = $("#playersInRoom");
     pList.empty();
     if (isHost) {
+        console.log('host');
         $.each(players,function(p) {
-            $('<li/>').html(players[p]+'<span class="removePlayer">x</span><a class="playerName" style="display:none;">'+players[p]+'</a>').appendTo(pList);
+            if (players[p] == userName) {
+                $('<li/>').text(players[p]).appendTo(pList);
+            } else {
+                $('<li/>').html(players[p]+'&nbsp;&nbsp;&nbsp;&nbsp;<span class="removePlayer">x</span><a class="playerName" style="display:none;">'+players[p]+'</a>').appendTo(pList);
+            }
         });
         $(".removePlayer").each(function() {
             $(this).click(function() {
@@ -60,24 +66,38 @@ socket.on('cards',function(cards) {
     drawCards();
 });
 
+socket.on('askForCard',function(c) {
+    console.log('asking for card');
+    socket.emit('assignMyCard',userName);
+});
+
+socket.on('heresYourCard',function(card) {
+    console.log(card);
+    document.cookie = "myCard="+card.url;
+    $("#playerCardImg").attr("src",card.url);
+    console.log("The src of your card was set to " + card.url);
+});
+
 socket.on('startingGame', function(playerList) {
     players = playerList;
     $(".startButton").click();
 });
 
 socket.on('yourName',function(name) {
+    console.log(name);
     userName = name;
 });
 
 socket.on('roomCode', function(roomCode) {
     $("#roomCodeDisplay").text("Room Code: " + roomCode);
     cardsInPlay['room'] = roomCode;
+    // Show link to join
+    $("#joinLink").text("localhost:5000/joinCode/"+roomCode);
 });
 
-socket.on('delete_cookie', (cookie) => {
+socket.on('delete_cookie', function(cookie) {
     document.cookie = cookie + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 });
-
 
 function selectCard(src, cardName) {
     if (!isHost) {
@@ -124,10 +144,10 @@ function drawCards() {
         });
         console.log('cards: '+Object.keys(cardsInPlay['cards']).length+', players: '+players.length);
         if (Object.keys(cardsInPlay['cards']).length < players.length) {
-            $("#numCards").text("Still need " + (players.length-Object.keys(cardsInPlay['cards']).length).toString() + " cards");
+            $("#numCards").text("Still need " + (players.length-Object.keys(cardsInPlay['cards']).length).toString() + " card(s).");
         }
         else if (Object.keys(cardsInPlay['cards']).length > players.length) {
-            $("#numCards").text("You've selected " + (Object.keys(cardsInPlay['cards']).length-players.length).toString() + " too many cards!");
+            $("#numCards").text("You've selected " + (Object.keys(cardsInPlay['cards']).length-players.length).toString() + " too many card(s)!");
         }
         else {
             $("#numCards").text("Card selection is balanced!");
@@ -156,6 +176,7 @@ function leaveLobby() {
     console.log('leaving lobby');
     delete_cookie("name");
     delete_cookie("roomCode");
+    delete_cookie("myCard");
     socket.emit('leaveRoom','');
     location.reload();
 }

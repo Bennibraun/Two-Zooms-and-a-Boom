@@ -216,6 +216,13 @@
                     <button class="startButton">START</button>
                 </form>
                 <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
+
+                <br><br><br>
+
+                <div id="joinLinkDiv" class="whiteBorder unselectable" style="padding:10px;display:inline-block; width:100%;">
+                    <textarea id="joinLink" readonly></textarea>
+                    <p id="copyInst" style="margin:auto; font-size: 20;">Click to copy</p>
+                </div>
             </div>
 
             <!-- ROUNDS column -->
@@ -243,7 +250,7 @@
                                     <option value="2">2 minutes</option>
                                     <option value="1">1 minute</option>
                                 </select>
-                            </div>
+                            /div>
                             <div class="pure-control-group">
                                 <h2>ROUND THREE:</h2>
                                 <select id="memoryType"  class="form-control" style="font-size: 20px;">
@@ -287,5 +294,15 @@
 
 
 <script src="/static/game.js"></script>
+
+<script>
+    // Copy link to clipboard on click
+    $("#joinLinkDiv").click(function() {
+        var copyStr = document.getElementById("joinLink");
+        copyStr.select();
+        document.execCommand("copy");
+        $("#copyInst").text("✔️ Copied!");
+    });
+</script>
 
 </html>

@@ -34,6 +34,7 @@ var cards = {};
 var rooms = {};
 
 // Declare cards
+{
 cards['agent_blue'] = {name:"Agent (Blue)", color:"blue"};
 cards['ambassador_blue'] = {name:"Ambassador (Blue)", color:"blue"};
 cards['angel_blue'] = {name:"Angel (Blue)", color:"blue"};
@@ -132,7 +133,7 @@ cards['traveler'] = {name:"Traveler", color:"grey"};
 cards['victim'] = {name:"Victim", color:"grey"};
 cards['wife'] = {name:"Wife", color:"grey"};
 cards['zombie_green'] = {name:"Zombie (Green)", color:"green"};
-
+}
 
 
 // Routing
@@ -191,15 +192,45 @@ app.get('/join', function(req, res) {
     res.redirect('/');
 });
 
+app.get('/joinCode/:room',function(req,res) {
+    res.cookie('roomCode', req.params.room);
+    console.log('set room code to '+req.params.room);
+    res.redirect('/');
+});
+
 app.get('/play',function(req,res) {
+    // Tell all clients in room that the game's starting
     var roomCode = req.cookies.roomCode;
     if (!rooms[roomCode].started) {
         io.to(roomCode).emit('startingGame',players);
         rooms[roomCode].started = true;
     }
 
+    // Assign cards to players randomly
+    if (players[Object.keys(players)[0]].card != 'None') {
+        console.log(players[Object.keys(players)[0]].card);
+        console.log("cards already assigned.");
+    }
+    else {
+        var cards = rooms[roomCode].cardsInPlay.cards;
+        console.log(players);
+        var cardKeys = Object.keys(cards);
+        cardKeys.sort(function(a,b) {return Math.random() - 0.5;});
+        var playerKeys = Object.keys(players);
+        var i = 0;
+        cardKeys.forEach(function(k) {
+            // k is the name of the card, cards[k].url has image link
+            players[playerKeys[i]].card = {name:k,url:cards[k].url};
+            i++;
+        });
+        console.log(players);
+    }
+    
+    io.to(roomCode).emit('askForCard', '');
+
     res.sendFile(path.join(__dirname, 'play.html'));
 });
+
 
 app.get('/host', function(req, res) {
     var name = req.query.nameInput;
@@ -268,6 +299,13 @@ io.on('connection', function(socket) {
             }
         }
 
+        if (players[name].isHost) {
+            socket.emit('host','');
+        }
+        else {
+            socket.emit('isPlayer','')
+        }
+
         if (!currentRoom || !rooms[currentRoom]) {
             console.log("Room not found.");
 
@@ -282,12 +320,6 @@ io.on('connection', function(socket) {
             }
         }
 
-        if (players[name].isHost) {
-            socket.emit('host','');
-        }
-        else {
-            socket.emit('isPlayer','')
-        }
 
     });
 
@@ -339,5 +371,10 @@ io.on('connection', function(socket) {
         rooms[room].cardsInPlay = cardsInPlay;
         // Inform clients of card selection
         io.to(room).emit('cards',cardsInPlay);
+    });
+
+    socket.on('assignMyCard',function(userName) {
+        console.log("assigning card");
+        socket.emit('heresYourCard',players[userName].card);
     });
 });
