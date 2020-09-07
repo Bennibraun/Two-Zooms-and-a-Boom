@@ -78,7 +78,12 @@ socket.on('heresYourCard',function(card) {
     console.log("The src of your card was set to " + card.url);
 });
 
+socket.on('timeUpdate',function(timer) {
+    $("#timer").text(timer);
+});
+
 socket.on('startingGame', function(playerList) {
+    console.log('game started');
     players = playerList;
     $(".startButton").click();
 });
@@ -92,12 +97,20 @@ socket.on('roomCode', function(roomCode) {
     $("#roomCodeDisplay").text("Room Code: " + roomCode);
     cardsInPlay['room'] = roomCode;
     // Show link to join
-    $("#joinLink").text("localhost:5000/joinCode/"+roomCode);
+    $("#joinLink").text("two-zooms-and-a-boom.herokuapp.com/joinCode/"+roomCode);
 });
 
 socket.on('delete_cookie', function(cookie) {
     document.cookie = cookie + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 });
+
+socket.on('error message', function(msg) {
+    alert(msg);
+});
+
+function attemptStart() {
+    socket.emit('start game','');
+}
 
 function selectCard(src, cardName) {
     if (!isHost) {
@@ -145,12 +158,15 @@ function drawCards() {
         console.log('cards: '+Object.keys(cardsInPlay['cards']).length+', players: '+players.length);
         if (Object.keys(cardsInPlay['cards']).length < players.length) {
             $("#numCards").text("Still need " + (players.length-Object.keys(cardsInPlay['cards']).length).toString() + " card(s).");
+            socket.emit('cards balanced',false);
         }
         else if (Object.keys(cardsInPlay['cards']).length > players.length) {
             $("#numCards").text("You've selected " + (Object.keys(cardsInPlay['cards']).length-players.length).toString() + " too many card(s)!");
+            socket.emit('cards balanced',false);
         }
         else {
             $("#numCards").text("Card selection is balanced!");
+            socket.emit('cards balanced',true);
         }
     }
 }
@@ -178,7 +194,7 @@ function leaveLobby() {
     delete_cookie("roomCode");
     delete_cookie("myCard");
     socket.emit('leaveRoom','');
-    location.reload();
+    location.href = "/";
 }
 
 function get_cookie(name) {
