@@ -235,7 +235,7 @@ app.get('/play',function(req,res) {
     
     io.to(roomCode).emit('askForCard', '');
 
-    startTimer(roomCode,)
+    startTimer(roomCode,5000);
 
     res.sendFile(path.join(__dirname, 'play.html'));
 });
@@ -282,9 +282,9 @@ server.listen(process.env.PORT || 5000, function() {
 function startTimer(roomCode,length) {
     var start = Date.now() / 1000;
     setInterval(function() {
-        console.log('got time');
         var time = length - ((Date.now()/1000) - start); // milliseconds elapsed since start
         io.to(roomCode).emit('timeUpdate',Math.floor(time)); // in seconds
+        // console.log(Math.floor(time));
     }, 1000); // update about every second
 }
 
