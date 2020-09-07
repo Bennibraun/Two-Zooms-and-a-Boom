@@ -79,7 +79,16 @@ socket.on('heresYourCard',function(card) {
 });
 
 socket.on('timeUpdate',function(timer) {
-    $("#timer").text(timer);
+    var clockText = ''
+    clockText += parseInt(timer / 60);
+    clockText += ':';
+    var min = timer % 60;
+    if (min < 10) {
+        clockText += '0';
+    }
+    clockText += parseInt(min);
+
+    $("#timer").text(clockText);
 });
 
 socket.on('startingGame', function(playerList) {

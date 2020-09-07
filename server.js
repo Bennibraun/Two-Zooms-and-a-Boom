@@ -33,6 +33,7 @@ var players = {};
 var cards = {};
 var rooms = {};
 var cardsBalanced = false;
+var timerRunning = false;
 
 // Declare cards
 {
@@ -235,7 +236,9 @@ app.get('/play',function(req,res) {
     
     io.to(roomCode).emit('askForCard', '');
 
-    startTimer(roomCode,5000);
+    if (!timerRunning) {
+        startTimer(roomCode,500);
+    }
 
     res.sendFile(path.join(__dirname, 'play.html'));
 });
@@ -254,7 +257,7 @@ app.get('/host', function(req, res) {
     var roomCode = Math.random().toString(36).substring(2, 6);
     // console.log(roomCode);
     // TODO: Remove later
-    roomCode = "lnbg";
+    // roomCode = "lnbg";
 
     res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
 
@@ -281,10 +284,12 @@ server.listen(process.env.PORT || 5000, function() {
 // length in seconds
 function startTimer(roomCode,length) {
     var start = Date.now() / 1000;
+    timerRunning = true;
     setInterval(function() {
+        // console.log('now: '+Date.now()/1000);
         var time = length - ((Date.now()/1000) - start); // milliseconds elapsed since start
+        // console.log('time: '+time);
         io.to(roomCode).emit('timeUpdate',Math.floor(time)); // in seconds
-        // console.log(Math.floor(time));
     }, 1000); // update about every second
 }
 
