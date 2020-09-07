@@ -10,6 +10,9 @@ var userName = '';
 var isHost = false;
 var players;
 var cardsInPlay = {room:"",cards:{}};
+var timerRunning = false;
+var timer;
+var clientDesynced = true;
 
 
 socket.on('host', function(data) {
@@ -78,18 +81,45 @@ socket.on('heresYourCard',function(card) {
     console.log("The src of your card was set to " + card.url);
 });
 
-socket.on('timeUpdate',function(timer) {
-    var clockText = ''
-    clockText += parseInt(timer / 60);
-    clockText += ':';
-    var min = timer % 60;
-    if (min < 10) {
-        clockText += '0';
-    }
-    clockText += parseInt(min);
-
-    $("#timer").text(clockText);
+socket.on('start timer',function(params) {
+    console.log(params);
+    startTimer(params.timerLength,params.startTime);
 });
+
+function startTimer(length, startTime) {
+    if (timerRunning) {
+        return;
+    } else {
+        timerRunning = true;
+    }
+
+    var timer = setInterval(function() {
+        var time = Math.ceil(length - ((Date.now()/1000) - startTime)); // milliseconds elapsed since start
+        if (time <= 0) {
+            clearInterval(timer);
+        }
+        if (clientDesynced) {
+            socket.emit('client synced','');
+            clientDesynced = false;
+        }
+        var clockText = '';
+        clockText += parseInt(time / 60);
+        clockText += ':';
+        var min = time % 60;
+        if (min < 10) {
+            clockText += '0';
+        }
+        clockText += parseInt(min);
+
+        $("#timer").text(clockText);
+    }, 1000); // update about every second
+}
+
+socket.on('stop timer',function() {
+    timerRunning = false;
+    clearInterval(timer);
+});
+
 
 socket.on('startingGame', function(playerList) {
     console.log('game started');
@@ -143,8 +173,8 @@ function selectCard(src, cardName) {
     li.css("background-color","#1c1c1c");
 
     socket.emit('update cards',cardsInPlay);
-
 }
+
 
 function drawCards() {
     $("#cardPreviewPane").empty();

@@ -34,6 +34,7 @@ var cards = {};
 var rooms = {};
 var cardsBalanced = false;
 var timerRunning = false;
+var clientsDesynced = true;
 
 // Declare cards
 {
@@ -138,6 +139,17 @@ cards['zombie_green'] = {name:"Zombie (Green)", color:"green"};
 }
 
 
+function sleep(milliseconds) { 
+    let timeStart = new Date().getTime(); 
+    while (true) { 
+      let elapsedTime = new Date().getTime() - timeStart; 
+      if (elapsedTime > milliseconds) { 
+        break; 
+      } 
+    } 
+  } 
+
+
 // Routing
 app.get('/', function(req, res) {
     try {
@@ -200,6 +212,46 @@ app.get('/joinCode/:room',function(req,res) {
     res.redirect('/');
 });
 
+
+app.get('/host', function(req, res) {
+    var name = req.query.nameInput;
+    if (players[name]) {
+        console.log("Name taken. Try again.");
+        res.sendFile(path.join(__dirname, 'landing_page.html'));
+    }
+    console.log(name);
+    res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
+    
+    // Random lobby code string
+    var roomCode = Math.random().toString(36).substring(2, 6);
+    // console.log(roomCode);
+    // TODO: Remove later
+    // roomCode = "lnbg";
+    
+    res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
+    
+    io.to(roomCode).emit('roomCode',roomCode);
+    
+    rooms[roomCode] = {players:[name], cardsInPlay:{}};
+    
+    if (!players[name]) {
+        players[name] = {
+            card: 'None',
+            room: roomCode,
+            isLeader: false,
+            isHost: true
+        }
+    }
+    res.redirect('/');
+});
+
+
+// Start the server
+server.listen(process.env.PORT || 5000, function() {
+    console.log('Starting server');
+});
+
+
 app.get('/play',function(req,res) {
 
     if (!cardsBalanced) {
@@ -236,60 +288,36 @@ app.get('/play',function(req,res) {
     
     io.to(roomCode).emit('askForCard', '');
 
-    if (!timerRunning) {
-        startTimer(roomCode,500);
-    }
-
+    
     res.sendFile(path.join(__dirname, 'play.html'));
-});
+    
+    // sleep(5000);
 
-
-app.get('/host', function(req, res) {
-    var name = req.query.nameInput;
-    if (players[name]) {
-        console.log("Name taken. Try again.");
-        res.sendFile(path.join(__dirname, 'landing_page.html'));
-    }
-    console.log(name);
-    res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
-
-    // Random lobby code string
-    var roomCode = Math.random().toString(36).substring(2, 6);
-    // console.log(roomCode);
-    // TODO: Remove later
-    // roomCode = "lnbg";
-
-    res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
-
-    io.to(roomCode).emit('roomCode',roomCode);
-
-    rooms[roomCode] = {players:[name], cardsInPlay:{}};
-
-    if (!players[name]) {
-        players[name] = {
-            card: 'None',
-            room: roomCode,
-            isLeader: false,
-            isHost: true
-        }
-    }
-    res.redirect('/');
-});
-
-// Start the server
-server.listen(process.env.PORT || 5000, function() {
-    console.log('Starting server');
+    startTimer(roomCode,500);
 });
 
 // length in seconds
 function startTimer(roomCode,length) {
+    if (timerRunning) {
+        return;
+    } else {
+        timerRunning = true;
+    }
     var start = Date.now() / 1000;
-    timerRunning = true;
-    setInterval(function() {
-        // console.log('now: '+Date.now()/1000);
+    console.log("telling "+roomCode+" to start a timer of length "+length);
+    io.to(roomCode).emit('start timer',{timerLength:length, startTime:start});
+    var timer = setInterval(function() {
+        if (clientsDesynced) {
+            console.log('attempting client sync');
+            io.to(roomCode).emit('start timer',{timerLength:length, startTime:start});
+        }
         var time = length - ((Date.now()/1000) - start); // milliseconds elapsed since start
+        if (time <= 0) {
+            clearInterval(timer);
+        }
+        console.log(Math.ceil(time));
+        // console.log('now: '+Date.now()/1000);
         // console.log('time: '+time);
-        io.to(roomCode).emit('timeUpdate',Math.floor(time)); // in seconds
     }, 1000); // update about every second
 }
 
@@ -344,8 +372,6 @@ io.on('connection', function(socket) {
                 io.to(currentRoom).emit('cards',rooms[currentRoom].cardsInPlay);
             }
         }
-
-
     });
 
     // Remove socket from the lobby
@@ -412,4 +438,9 @@ io.on('connection', function(socket) {
             socket.emit('error message','Couldn\'t start the game because the cards are imbalanced.');
         }
     });
+
+    socket.on('client synced', function() {
+        clientsDesynced = false;
+    });
 });
+
