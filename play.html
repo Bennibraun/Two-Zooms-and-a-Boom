@@ -27,12 +27,12 @@
 
         <div class="row">
             <div class="col-sm-4">
-                <!-- Yo Anthony, this will be where we put the left card that belongs to the user. I'll fill this in as an <img> using javascript. -->
                 <div>
                     <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 40vw; margin-left: 10px;" />
                 </div>
                 <script>
                     var cardUrl = document.cookie.split('; ').find(row => row.startsWith('myCard')).split('=')[1];
+                    console.log('your card as stored in cookies was ' + cardUrl);
                     $("#playerCardImg").attr("src",cardUrl);
                 </script>
 
@@ -46,7 +46,6 @@
                 <ul id="playersInRoom"></ul>
             </div>
             <div class="col-sm-4">
-                <!-- Yo Anthony, this will be where we put the left card that belongs to the user. I'll fill this in as an <img> using javascript. -->
                 <div>
                     <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 40vw; margin-right: 10px;" />
                 </div>

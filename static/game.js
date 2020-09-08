@@ -75,7 +75,9 @@ socket.on('askForCard',function(c) {
 });
 
 socket.on('heresYourCard',function(card) {
+    console.log('your card was sent as ');
     console.log(card);
+    console.log('and the cookie is being set.');
     document.cookie = "myCard="+card.url;
     $("#playerCardImg").attr("src",card.url);
     console.log("The src of your card was set to " + card.url);
