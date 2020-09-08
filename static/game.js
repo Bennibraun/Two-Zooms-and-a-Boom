@@ -136,7 +136,7 @@ socket.on('roomCode', function(roomCode) {
     $("#roomCodeDisplay").text("Room Code: " + roomCode);
     cardsInPlay['room'] = roomCode;
     // Show link to join
-    $("#joinLink").text("two-zooms-and-a-boom.herokuapp.com/joinCode/"+roomCode);
+    $("#joinLink").text("http://twozoomsandaboom.com/joinCode/"+roomCode);
 });
 
 socket.on('delete_cookie', function(cookie) {
