@@ -286,6 +286,7 @@ app.get('/play',function(req,res) {
         console.log(players);
     }
     
+    console.log('telling players to ask for card');
     io.to(roomCode).emit('askForCard', '');
 
     
@@ -426,6 +427,8 @@ io.on('connection', function(socket) {
 
     socket.on('assignMyCard',function(userName) {
         // console.log("assigning card");
+        console.log(players);
+        console.log(players[username]);
         socket.emit('heresYourCard',players[userName].card);
     });
 
