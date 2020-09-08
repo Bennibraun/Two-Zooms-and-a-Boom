@@ -280,6 +280,7 @@ app.get('/play',function(req,res) {
         var i = 0;
         cardKeys.forEach(function(k) {
             // k is the name of the card, cards[k].url has image link
+            console.log('setting player card for '+ playerKeys[i]+': name='+k+', url='+cards[k].url);
             players[playerKeys[i]].card = {name:k,url:cards[k].url};
             i++;
         });
@@ -316,7 +317,6 @@ function startTimer(roomCode,length) {
         if (time <= 0) {
             clearInterval(timer);
         }
-        console.log(Math.ceil(time));
         // console.log('now: '+Date.now()/1000);
         // console.log('time: '+time);
     }, 1000); // update about every second
