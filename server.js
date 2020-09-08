@@ -428,7 +428,7 @@ io.on('connection', function(socket) {
     socket.on('assignMyCard',function(userName) {
         // console.log("assigning card");
         console.log(players);
-        console.log(players[username]);
+        console.log(players[userName]);
         socket.emit('heresYourCard',players[userName].card);
     });
 
