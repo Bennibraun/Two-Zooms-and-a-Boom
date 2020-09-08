@@ -287,7 +287,7 @@ app.get('/play',function(req,res) {
         console.log(players);
     }
     
-    console.log('telling players to ask for card');
+    console.log('telling players to ask for their card');
     io.to(roomCode).emit('askForCard', '');
 
     
@@ -330,7 +330,7 @@ io.on('connection', function(socket) {
     socket.on('new player', function() {
         if (!players[name]) {
             players[name] = {
-                card: 'sampleCard',
+                card: 'None',
                 room: '',
                 isLeader: false,
                 isHost: false
