@@ -26,31 +26,32 @@
         </div>
 
         <div class="row">
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div>
-                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 40vw; margin-left: 10px;" />
+                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 100%; margin-left: 10px;" />
+                </div>
+                <div>
+                    <h1 id="yourCardName">YOUR CARD</h1>
                 </div>
                 <script>
-                    var cardUrl = document.cookie.split('; ').find(row => row.startsWith('myCard')).split('=')[1];
-                    console.log('your card as stored in cookies was ' + cardUrl);
+                    var cardUrl = document.cookie.split('; ').find(row => row.startsWith('myCardUrl')).split('=')[1];
+                    var cardName = document.cookie.split('; ').find(row => row.startsWith('myCardName')).split('=')[1];
+                    // console.log('your card as stored in cookies was ' + cardUrl);
                     $("#playerCardImg").attr("src",cardUrl);
+                    $("#yourCardName").text(cardName);
                 </script>
-
-                <div>
-                    <h1>YOUR CARD</h1>
-                </div>
             </div>
-            <div class="col-sm-4 whiteBorder" style="margin-top: 5%;">           
+            <div class="col-sm-6 whiteBorder" style="margin-top: 5%;">           
                 <h1>PLAYERS</h2>
                 <h3 id="roomCodeDisplay"></h3>
                 <ul id="playersInRoom"></ul>
             </div>
-            <div class="col-sm-4">
+            <div class="col-sm-3">
                 <div>
-                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 40vw; margin-right: 10px;" />
+                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 100%; margin-right: 10px;" />
                 </div>
                 <div>
-                    <h1>TARGET'S CARD</h1>
+                    <h1 id="otherCardName">TARGET'S CARD</h1>
                 </div>
             </div>
         </div>

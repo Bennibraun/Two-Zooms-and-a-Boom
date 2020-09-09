@@ -8,7 +8,6 @@ var socketIO = require('socket.io');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser')
 var cookie = require("cookie");
-var $ = jQuery = require('jquery');
 
 var app = express();
 var server = http.Server(app);
@@ -232,7 +231,7 @@ app.get('/host', function(req, res) {
     
     io.to(roomCode).emit('roomCode',roomCode);
     
-    rooms[roomCode] = {players:[name], cardsInPlay:{}};
+    rooms[roomCode] = {players:[name], cardsInPlay:{}, started:false};
     
     if (!players[name]) {
         players[name] = {
@@ -254,6 +253,7 @@ server.listen(process.env.PORT || 5000, function() {
 
 app.get('/play',function(req,res) {
 
+    //TODO: Add in case for card burial
     if (!cardsBalanced) {
         res.redirect('/');
         return;
@@ -261,41 +261,62 @@ app.get('/play',function(req,res) {
 
     // Tell all clients in room that the game's starting
     var roomCode = req.cookies.roomCode;
-    if (!rooms[roomCode].started) {
-        io.to(roomCode).emit('startingGame',players);
-        rooms[roomCode].started = true;
+    var room = rooms[roomCode];
+
+    var roomPlayers = {};
+    Object.keys(players).forEach(function(pName) {
+        if (players[pName].room == roomCode) {
+            roomPlayers[pName] = (players[pName]);
+        }
+    });
+
+    if (!room.started) {
+        io.to(roomCode).emit('startingGame',roomPlayers);
+        room.started = true;
     }
 
     // Assign cards to players randomly
-    if (players[Object.keys(players)[0]].card != 'None') {
-        console.log(players[Object.keys(players)[0]].card);
+    // First, check if all cards in room have been assigned
+    var cardsAlreadyAssigned = true;
+    room.players.forEach(function(pName) {
+        if (players[pName].card == 'None') {
+            cardsAlreadyAssigned = false;
+        }
+    });
+
+    if (cardsAlreadyAssigned) {
         console.log("cards already assigned.");
     }
     else {
-        var cards = rooms[roomCode].cardsInPlay.cards;
-        console.log(players);
+        var cards = room.cardsInPlay.cards;
+        console.log(roomPlayers);
         var cardKeys = Object.keys(cards);
         cardKeys.sort(function(a,b) {return Math.random() - 0.5;});
-        var playerKeys = Object.keys(players);
+        var playerKeys = Object.keys(roomPlayers);
         var i = 0;
         cardKeys.forEach(function(k) {
-            // k is the name of the card, cards[k].url has image link
-            console.log('setting player card for '+ playerKeys[i]+': name='+k+', url='+cards[k].url);
-            players[playerKeys[i]].card = {name:k,url:cards[k].url};
+            try {
+                // k is the name of the card, cards[k].url has image link
+                console.log('setting player card for '+ playerKeys[i]+': name='+k+', url='+cards[k].url);
+                // Set card for both room players list and global players list
+                roomPlayers[playerKeys[i]].card = {name:k,url:cards[k].url};
+                players[playerKeys[i]].card = {name:k,url:cards[k].url};
+            }
+            catch {
+                console.log('looks like all cards have been assigned with at least 1 left over');
+            }
             i++;
         });
-        console.log(players);
-    }
-    
-    console.log('telling players to ask for their card');
-    io.to(roomCode).emit('askForCard', '');
 
-    
-    res.sendFile(path.join(__dirname, 'play.html'));
-    
-    // sleep(5000);
+        console.log(roomPlayers);
+
+        console.log('telling players to ask for their card');
+        io.to(roomCode).emit('askForCard', '');
+    }
 
     startTimer(roomCode,500);
+    
+    res.sendFile(path.join(__dirname, 'play.html'));
 });
 
 // length in seconds
@@ -311,15 +332,33 @@ function startTimer(roomCode,length) {
     var timer = setInterval(function() {
         if (clientsDesynced) {
             console.log('attempting client sync');
-            io.to(roomCode).emit('start timer',{timerLength:length, startTime:start});
+            syncClients(roomCode,length,start);
         }
-        var time = length - ((Date.now()/1000) - start); // milliseconds elapsed since start
+        var time = Math.ceil(length - ((Date.now()/1000) - start)); // milliseconds elapsed since start
         if (time <= 0) {
             clearInterval(timer);
+        }
+        else if (time % 60 == 0) {
+            // Sync up clients once a minute
+            console.log('sync up clients 60');
+            clientsDesynced = true;
+        }
+        else if (length-time < 10) {
+            // Sync up clients in the first 10 seconds
+            console.log('sync up clients 10');
+            clientsDesynced = true;
+        }
+        else {
+            clientsDesynced = false;
         }
         // console.log('now: '+Date.now()/1000);
         // console.log('time: '+time);
     }, 1000); // update about every second
+}
+
+function syncClients(roomCode,length,start) {
+    io.to(roomCode).emit('start timer',{timerLength:length, startTime:start});
+    io.to(roomCode).emit('askForCard','');
 }
 
 // WebSocket handlers
@@ -438,11 +477,12 @@ io.on('connection', function(socket) {
 
     socket.on('start game', function() {
         if (!cardsBalanced) {
-            socket.emit('error message','Couldn\'t start the game because the cards are imbalanced.');
+            socket.emit('alert message','Couldn\'t start the game because the cards are imbalanced.');
         }
     });
 
     socket.on('client synced', function() {
+        console.log('clients synced up');
         clientsDesynced = false;
     });
 });

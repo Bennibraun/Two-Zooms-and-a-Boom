@@ -12,11 +12,10 @@ var players;
 var cardsInPlay = {room:"",cards:{}};
 var timerRunning = false;
 var timer;
-var clientDesynced = true;
 
 
 socket.on('host', function(data) {
-    console.log("user set as host.");
+    // console.log("user set as host.");
     isHost = true;
     
     // Show host-only setup and such
@@ -35,7 +34,7 @@ socket.on('players', function(playerList) {
     pList = $("#playersInRoom");
     pList.empty();
     if (isHost) {
-        console.log('host');
+        // console.log('host');
         $.each(players,function(p) {
             if (players[p] == userName) {
                 $('<li/>').text(players[p]).appendTo(pList);
@@ -47,7 +46,7 @@ socket.on('players', function(playerList) {
             $(this).click(function() {
                 var playerToRemove = $(this).next().text();
                 socket.emit('removePlayer',playerToRemove);
-                console.log("removed " + playerToRemove);
+                // console.log("removed " + playerToRemove);
             });
         });
     }
@@ -58,33 +57,34 @@ socket.on('players', function(playerList) {
     }
 
     if (!players.includes(userName)) {
-        console.log("this session has been removed.");
+        // console.log("this session has been removed.");
         leaveLobby();
     }
 });
 
 socket.on('cards',function(cards) {
     cardsInPlay = cards;
-    console.log(cards);
+    // console.log(cards);
     drawCards();
 });
 
 socket.on('askForCard',function(c) {
-    console.log('asking for card');
+    // console.log('asking for card');
     socket.emit('assignMyCard',userName);
 });
 
 socket.on('heresYourCard',function(card) {
-    console.log('your card was sent as ');
-    console.log(card);
-    console.log('and the cookie is being set.');
-    document.cookie = "myCard="+card.url;
+    // console.log('your card was sent as ');
+    // console.log(card);
+    // console.log('and the cookie is being set.');
+    document.cookie = "myCardUrl="+card.url;
+    document.cookie = "myCardName="+card.name;
     $("#playerCardImg").attr("src",card.url);
-    console.log("The src of your card was set to " + card.url);
+    // console.log("The src of your card was set to " + card.url);
 });
 
 socket.on('start timer',function(params) {
-    console.log(params);
+    // console.log(params);
     startTimer(params.timerLength,params.startTime);
 });
 
@@ -95,14 +95,12 @@ function startTimer(length, startTime) {
         timerRunning = true;
     }
 
+    socket.emit('client synced','');
+    
     var timer = setInterval(function() {
         var time = Math.ceil(length - ((Date.now()/1000) - startTime)); // milliseconds elapsed since start
         if (time <= 0) {
             clearInterval(timer);
-        }
-        if (clientDesynced) {
-            socket.emit('client synced','');
-            clientDesynced = false;
         }
         var clockText = '';
         clockText += parseInt(time / 60);
@@ -112,7 +110,7 @@ function startTimer(length, startTime) {
             clockText += '0';
         }
         clockText += parseInt(min);
-
+        
         $("#timer").text(clockText);
     }, 1000); // update about every second
 }
@@ -124,13 +122,13 @@ socket.on('stop timer',function() {
 
 
 socket.on('startingGame', function(playerList) {
-    console.log('game started');
+    // console.log('game started');
     players = playerList;
     $(".startButton").click();
 });
 
 socket.on('yourName',function(name) {
-    console.log(name);
+    // console.log(name);
     userName = name;
 });
 
@@ -145,7 +143,7 @@ socket.on('delete_cookie', function(cookie) {
     document.cookie = cookie + '=;expires=Thu, 01 Jan 1970 00:00:01 GMT;';
 });
 
-socket.on('error message', function(msg) {
+socket.on('alert message', function(msg) {
     alert(msg);
 });
 
@@ -155,15 +153,15 @@ function attemptStart() {
 
 function selectCard(src, cardName) {
     if (!isHost) {
-        console.log("You shouldn't be able to do this!");
+        // console.log("You shouldn't be able to do this!");
         return;
     }
     
     if (cardsInPlay['cards'][cardName]) {
-        console.log("Card is already in play.");
+        // console.log("Card is already in play.");
         return;
     }
-
+    
     // Add card to setup
     cardsInPlay['cards'][cardName] = {url:src};
     drawCards();
@@ -171,9 +169,9 @@ function selectCard(src, cardName) {
     var li = $("#cardsList li").filter(function() {
         return $(this).children("a")[0].text == cardName;
     });
-
+    
     li.css("background-color","#1c1c1c");
-
+    
     socket.emit('update cards',cardsInPlay);
 }
 
@@ -191,7 +189,7 @@ function drawCards() {
             $("#cardPreviewPane").append('<div class="col-sm-4 card"><img src="'+src+'" class="cardPreviewImg"><a class="unselectable">'+cardName+'</a></div>');
         }
     });
-
+    
     if (isHost) {
         $(".card").unbind('click').click(function() {
             deselectCard($(this).children("img")[0].getAttribute("src"));
@@ -233,7 +231,8 @@ function leaveLobby() {
     console.log('leaving lobby');
     delete_cookie("name");
     delete_cookie("roomCode");
-    delete_cookie("myCard");
+    delete_cookie("myCardName");
+    delete_cookie("myCardUrl");
     socket.emit('leaveRoom','');
     location.href = "/";
 }

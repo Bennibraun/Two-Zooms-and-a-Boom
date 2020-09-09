@@ -42,6 +42,8 @@
                 <script>
                     var roomCode = document.cookie.split('; ').find(row => row.startsWith('roomCode')).split('=')[1];
                     $("#joinCodeInput").val(roomCode);
+                    var userName = document.cookie.split('; ').find(row => row.startsWith('name')).split('=')[1];
+                    $("#nameInput").val(roomCode);
                 </script>
 
             </div>
@@ -57,9 +59,9 @@
                 
                 <!-- host action-->
                 <form action="/host/" method="get">
-                <label for="nameInput">Name</label>
-                <input id="nameInput" name="nameInput">
-                <input id="submitBtn" type="submit"></button>
+                <label for="nameInputHost">Name</label>
+                <input id="nameInputHost" name="nameInput">
+                <input id="submitBtnHost" type="submit"></button>
                 </form>
 
             </div>
