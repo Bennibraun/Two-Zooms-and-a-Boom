@@ -4,7 +4,7 @@
 var socket = io();
 
 // Tell the server to instantiate a player
-socket.emit('new player');
+socket.emit('new connection');
 
 var userName = '';
 var isHost = false;

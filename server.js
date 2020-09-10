@@ -8,6 +8,7 @@ var socketIO = require('socket.io');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser')
 var cookie = require("cookie");
+const { exists } = require('fs');
 
 var app = express();
 var server = http.Server(app);
@@ -28,9 +29,14 @@ Object.filter = (obj, predicate) =>
           .reduce( (res, key) => (res[key] = obj[key], res), {} );
 
 // Global vars
-var players = {};
-var cards = {};
-var rooms = {};
+var rooms = [];
+rooms.push({
+    code: 'default',
+    subroomA: { players: [], leader: '' },
+    subroomB: { players: [], leader: '' },
+    hostName: ''
+});
+
 var cardsBalanced = false;
 var timerRunning = false;
 var clientsDesynced = true;
@@ -146,63 +152,99 @@ function sleep(milliseconds) {
         break; 
       } 
     } 
-  } 
+}
 
+// Returns the first matching room given the room code
+function getRoom(roomCode) {
+    return rooms.find(function(room) {
+        return room.code == roomCode;
+    });
+}
+
+// Returns the player with the given name in the given room
+function getPlayer(roomCode, name) {
+    var room = getRoom(roomCode);
+    return room.players.find(function(p) {
+        return p.name == name;
+    });
+}
+
+function deletePlayer(roomCode, name) {
+    var room = getRoom(roomCode);
+    room.subroomA.players = room.subroomA.players.filter(function(p) {
+        return p.name != name;
+    });
+    room.subroomB.players = room.subroomB.players.filter(function(p) {
+        return p.name != name;
+    });
+}
+
+function deleteAllCookies() {
+    res.cookie('name', name, { expires: new Date(Date.now()-1) });
+    res.cookie('roomCode', roomCode, { expires: new Date(Date.now()-1) });
+}
 
 // Routing
 app.get('/', function(req, res) {
     try {
-        // console.log(req.cookies);
         var name = req.cookies.name;
-        if (name != undefined) {
-            if (!players[name]) {
-                // Delete cookies, reset
-                console.log("resetting player");
-                res.cookie('name',name, { expires: new Date(Date.now()-1) });
-                res.cookie('roomCode', roomCode, { expires: new Date(Date.now()-1) });
-                res.sendFile(path.join(__dirname, 'landing_page.html'));
-            }
-            else {
-                // console.log("user identified as " + name + ". Proceeding to index.");
-                res.sendFile(path.join(__dirname, 'index.html'));
-            }
+        var roomCode = req.cookies.roomCode;
+        var room = getRoom(roomCode);
+        var player = getPlayer(roomCode,name);
+
+        if (room && player) {
+            // Player detected, sending to lobby
+            res.sendFile(path.join(__dirname, 'lobby.html'));
             return;
-        }
-        else {
-            console.log("No name found, sending to landing page. [2]");
+        } else {
+            // Delete cookies, reset
+            deleteAllCookies();
         }
     } catch {
-        console.log("No name found, sending to landing page.");
+        console.log("sending new user to landing page.");
     }
+
     res.sendFile(path.join(__dirname, 'landing_page.html'));
+    return;
 });
 
+
 app.get('/join', function(req, res) {
-    var name = req.query.nameInput;
+    var username = req.query.nameInput;
     var roomCode = req.query.joinCodeInput;
-    if (players[name]) {
-        console.log("Name taken. Try again.");
-        res.sendFile(path.join(__dirname, 'landing_page.html'));
-        return;
+
+    // If player already exists...
+    if (getPlayer(roomCode,username)) {
+        // TODO: check if this works at all lol
+        res.send('<script>alert("There can only be one '+username+', and it\'s not you.")</script>');
+        // res.sendFile(path.join(__dirname, 'landing_page.html'));
     }
-    if (!rooms[roomCode]) {
-        console.log("Room not found.");
-        res.sendFile(path.join(__dirname, 'landing_page.html'));
-        return;
+    
+    // If room wasn't found...
+    if (!getRoom(roomCode)) {
+        console.log("Failed to find room "+roomCode);
+        res.send('<script>alert("If a room is not in our archives, it simply does not exist.")</script>');
+        // res.sendFile(path.join(__dirname, 'landing_page.html'));
     }
-    console.log(name);
-    res.cookie('name',name, { expires: new Date(Date.now()+100000000) });
+
+    // Bake some fresh cookies
+    res.cookie('name', username, { expires: new Date(Date.now()+100000000) });
     res.cookie('roomCode', roomCode, { expires: new Date(Date.now()+100000000) });
 
-    if (!players[name]) {
-        players[name] = {
-            card: 'None',
-            room: roomCode,
-            isLeader: false,
-            isHost: false
+    if (!getPlayer(roomCode,username)) {
+        var existingPlayer = getPlayer('default',username);
+        if (existingPlayer) {
+            getRoom(roomCode).subroomA.players.push(existingPlayer);
+            deletePlayer('default',username);
         }
+        getRoom(roomCode).subroomA.players.push({
+            name: username,
+            card: 'None',
+            clientID:
+        });
     }
     res.redirect('/');
+    return;
 });
 
 app.get('/joinCode/:room',function(req,res) {
@@ -364,55 +406,25 @@ function syncClients(roomCode,length,start) {
 // WebSocket handlers
 io.on('connection', function(socket) {
     var cookies = cookie.parse(socket.handshake.headers.cookie);
-    var name = cookies.name;
-    var currentRoom = cookies.roomCode;
-    socket.on('new player', function() {
-        if (!players[name]) {
-            players[name] = {
-                card: 'None',
-                room: '',
-                isLeader: false,
-                isHost: false
-            }
-        }
-        console.log(name + ": ");
-        console.log(players[name]);
+    var username = cookies.name;
+    var roomCode = cookies.roomCode;
 
-        // Add player to room
-        for (room in rooms) {
-            if (players[name].room == room) {
-                console.log('room found.');
-                if (!rooms[room].players.includes(name)) {
-                    rooms[room].players.push(name);
-                }
-                currentRoom = room;
-                socket.join(currentRoom);
-                console.log('room joined')
-                break;
-            }
-        }
+    // Create player object
+    var player = {
+        name: username,
+        card: '',
+        clientID: socket.id
+    }
 
-        if (players[name].isHost) {
-            socket.emit('host','');
-        }
-        else {
-            socket.emit('isPlayer','')
-        }
-
-        if (!currentRoom || !rooms[currentRoom]) {
-            console.log("Room not found.");
-
-        }
-        else {
-            // Tell client who's in the room
-            socket.emit('yourName',name);
-            io.to(currentRoom).emit('players', rooms[currentRoom].players);
-            io.to(currentRoom).emit('roomCode',currentRoom);
-            if (rooms[currentRoom].cardsInPlay['cards']) {
-                io.to(currentRoom).emit('cards',rooms[currentRoom].cardsInPlay);
-            }
-        }
-    });
+    var room = getRoom(roomCode);
+    if (room) {
+        // Place player in existing room (default to subroomA until assignment)
+        room.subroomA.players.push(player);
+    } else {
+        // Place player in default room to await assignment
+        room = getRoom('default');
+        room.subroomA.players.push(player);
+    }
 
     // Remove socket from the lobby
     socket.on('leaveRoom',function(data) {
