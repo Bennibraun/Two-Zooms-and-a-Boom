@@ -5,7 +5,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
-    
+
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
 
@@ -26,11 +26,11 @@
         <div class="row">
 
             <!-- SETUP column -->
-            <div class="col-sm-4 whiteBorder setup" style="height: 90%;"> 
+            <div class="col-sm-4 whiteBorder setup" style="height: 90%;">
                 <div class="row" style="height: 10%">
                     <h1>SETUP</h2>
                     <a id="numCards"></a>
-                </div> 
+                </div>
 
                 <!-- Playing with select
                 <select id="styledSelect" class="blueText">
@@ -42,7 +42,7 @@
                 <div id="cardPreviewRow" class="row" style="height: 45%;">
                     <div class="col-sm" style="height:100%; padding: 10px;">
                         <div class="row card-grid" id="cardPreviewPane" style="overflow:auto; height: 100%; padding: 10px;"></div>
-                        
+
                         <script>
                             $(".card").each(function() {
                                 width = $(this).css("width");
@@ -55,9 +55,9 @@
 
                 <div id="cardSetupBottom" class="row" style="height: 45%">
                     <div id="hostCardSelection" class="container" style="width: 100%;">
-                
+
                         <input type="text" id="searchCardsInput" onkeyup="cardSearch()" placeholder="Search for a card...">
-                
+
                         <ul id="cardsList" style="overflow: auto; max-height: 75%;">
                             <li><img src="/static/cards/agent_blue.jpg"class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Agent (Blue)</a></li>
                             <li><img src="/static/cards/agent_red.jpg"class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Agent (Red)</a></li>
@@ -158,7 +158,7 @@
                             <li><img src="/static/cards/wife.jpg"class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Wife</a></li>
                             <li><img src="/static/cards/zombie_green.jpg"class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Zombie (Green)</a></li>
                         </ul>
-                
+
 
                         <script>
                             function cardSearch() {
@@ -166,7 +166,7 @@
                                 filter = $('#searchCardsInput').val().toUpperCase();
                                 li = $('#cardsList li');
                                 a = li.children('a');
-                                
+
                                 // Loop through all list items, and hide those who don't match the search query
                                 for (i = 0; i < li.length; i++) {
                                     txtValue = a[i].text;
@@ -201,19 +201,19 @@
                                 }
                             });
                         </script>
-                
+
                     </div>
 
                 </div>
             </div>
 
             <!-- PLAYERS column -->
-            <div class="col-sm-4 whiteBorder">                
+            <div class="col-sm-4 whiteBorder">
                 <h1>PLAYERS</h2>
                 <h3 id="roomCodeDisplay"></h3>
                 <ul id="playersInRoom"></ul>
-                <form action="/play" method="get">
-                    <button class="startButton" onclick="attemptStart()">START</button>
+                <form id="startBtnForm" action="/play" method="get" style="display: none;">
+                    <button class="startButton" onclick="startGame()">START</button>
                 </form>
                 <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
 
@@ -226,9 +226,9 @@
             </div>
 
             <!-- ROUNDS column -->
-            <div class="col-sm-4 whiteBorder">
+            <div id="roundSettings" class="col-sm-4 whiteBorder" style="display: none;">
                 <h1>ROUNDS</h2>
-                    
+
                     <div class="pure">
                         <form class="pure-form-inline">
                             <div class="pure-control-group">
@@ -287,13 +287,10 @@
 
             </div>
         </div>
-    
+
     </div>
 
 </body>
-
-
-<script src="/static/game.js"></script>
 
 <script>
     // Copy link to clipboard on click
