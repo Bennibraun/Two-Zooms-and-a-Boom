@@ -16,71 +16,68 @@
 </head>
 
 <body>
-    <script src="/socket.io/socket.io.js"></script>
-
-    <div>
-        <h1>TWO ZOOMS & A BOOM</h1>
-    </div>
-
+    <div id="landingPage">
     <!-- JOIN A GAME CONTAINER -->
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-auto whiteBorder" style="margin-left: 10px; margin-right: 10px;">  
-                
-                <h2 style="font-size:x-large;">Join a game</h2>
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-auto whiteBorder" style="margin-left: 10px; margin-right: 10px;">  
+                    
+                    <h2 style="font-size:x-large;">Join a game</h2>
 
-                <!-- join action-->
-                <form action="/join/" method="get">
-                    <label for="nameInput">Name</label>
-                    <input id="nameInput" name="nameInput">
-                    <a>&nbsp;&nbsp;&nbsp;</a>
-                    <label for="joinCodeInput">Join Code</label>
-                    <input id="joinCodeInput" name="joinCodeInput">
-                    <input id="submitBtn" type="submit"></button>
-                </form>
+                    <!-- join action-->
+                    <form action="/join/" method="get">
+                        <label for="nameInput">Name</label>
+                        <input id="nameInput" name="nameInput">
+                        <a>&nbsp;&nbsp;&nbsp;</a>
+                        <label for="joinCodeInput">Join Code</label>
+                        <input id="joinCodeInput" name="joinCodeInput">
+                        <input id="submitBtn" type="submit"></button>
+                    </form>
 
-                <script>
-                    var roomCode = document.cookie.split('; ').find(row => row.startsWith('roomCode')).split('=')[1];
-                    $("#joinCodeInput").val(roomCode);
-                    var userName = document.cookie.split('; ').find(row => row.startsWith('name')).split('=')[1];
-                    $("#nameInput").val(roomCode);
-                </script>
+                    <script>
+                        var roomCode = document.cookie.split('; ').find(row => row.startsWith('roomCode')).split('=')[1];
+                        $("#joinCodeInput").val(roomCode);
+                        var userName = document.cookie.split('; ').find(row => row.startsWith('name')).split('=')[1];
+                        $("#nameInput").val(roomCode);
+                    </script>
 
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- HOST A GAME CONTAINER -->
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-auto whiteBorder" style="margin-left: 10px; margin-right: 10px;">  
-                
-                <h2 style="font-size:x-large;">Host a game</h2>
-                
-                <!-- host action-->
-                <form action="/host/" method="get">
-                <label for="nameInputHost">Name</label>
-                <input id="nameInputHost" name="nameInput">
-                <input id="submitBtnHost" type="submit"></button>
-                </form>
+        <!-- HOST A GAME CONTAINER -->
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-auto whiteBorder" style="margin-left: 10px; margin-right: 10px;">  
+                    
+                    <h2 style="font-size:x-large;">Host a game</h2>
+                    
+                    <!-- host action-->
+                    <form action="/host/" method="get">
+                        <label for="nameInputHost">Name</label>
+                        <input id="nameInputHost" name="nameInput">
+                        <input id="submitBtnHost" type="submit"></button>
+                    </form>
 
+                </div>
             </div>
         </div>
+        <!-- Cookie Consent -->
+        <div id="cookieBanner" style="background-color: black; position:absolute; bottom:0;">
+            <h4>Click the blue button</h4>
+            <p style="margin-left:30%;margin-right:30%;">Hey guys. Cookie Monster here. Hope you don't mind if I store some of my cookies on your computer for later. The European Union recently caught onto my cookie scheme so now I have to ask for permission. Oh, btw, if you don't click the button I won't let you play the game. So just don't think about it too much and just click that blue button down there. Go ahead. Why are you still reading this? Click it already!</p>
+            <button onclick="consentGiven()" class="btn btn-primary" style="margin:15px;">Dude, do I really have to click this</button>
+        </div>
+        <script>
+            function consentGiven() {
+                document.cookie = "cookieConsent=true";
+                $("#cookieBanner").remove();
+            }
+        </script>
+        <!-- End Cookie Consent -->
+        <a href="http://www.beesbeesbees.com" class="btn btn-primary" style="position:absolute;right:0;bottom:0;" target="_blank">BEES</a>
+
     </div>
-    <!-- Cookie Consent -->
-    <div id="cookieBanner" style="background-color: black; position:absolute; bottom:0;">
-        <h4>Click the big blue button</h4>
-        <p>Hey guys. Cookie Monster here. Hope you don't mind if I store some of my cookies on your computer for later? The European Union recently caught onto my cookie scheme so now I have to ask for permission. Oh, btw, if you don't click the button I won't let you play the game. So just don't think about it too much and just click that big blue button down there. Go ahead. Why are you still reading this? Click it already!</p>
-        <button onclick="consentGiven()">Dude, do I really have to click this</button>
-    </div>
-    <script>
-        function consentGiven() {
-            document.cookie = "cookieConsent=true";
-            $("#cookieBanner").remove();
-        }
-    </script>
-    <!-- End Cookie Consent -->
-    <a href="http://www.beesbeesbees.com" class="btn btn-primary" style="position:absolute;right:0;bottom:0;" target="_blank">BEES</a>
 
     <script src="/static/game.js"></script>
 </body>

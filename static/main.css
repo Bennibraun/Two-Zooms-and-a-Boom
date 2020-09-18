@@ -1,264 +1,276 @@
-h1, h2, h3, h4, h5, h6 {
-    font-family: Verdana, Geneva, sans-serif;
-    letter-spacing: -1px;
-    word-spacing: 1px;
-    color: white;
-    font-style: normal;
-    font-variant: normal;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Verdana, Geneva, sans-serif;
+  letter-spacing: -1px;
+  word-spacing: 1px;
+  color: white;
+  font-style: normal;
+  font-variant: normal;
 }
 
-h1 {   
-    font-size: 40px;
-    font-weight: 700;
-    font-style: bold;
-    text-align: center;
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  font-style: bold;
+  text-align: center;
 }
 
-h2 {   
-    font-size: 30px;
-    color: green;
+h2 {
+  font-size: 30px;
+  color: green;
 }
 
 h3 {
-    font-size: 25px;
-    color: hotpink;
+  font-size: 25px;
+  color: hotpink;
 }
 
 div {
-    text-align: center;
-    border: 1px transparent;
+  text-align: center;
+  border: 1px transparent;
 }
 
 body {
-    background-color: #050505;
+  background-color: #050505;
 }
 
 .whiteBorder {
-    border: 3px solid white; 
-    border-radius: 20px; 
-    background-color: #171717;
+  border: 3px solid white;
+  border-radius: 20px;
+  background-color: #171717;
 }
 
 .redBorder {
-    border: 3px solid red; 
-    border-radius: 20px; 
-    background-color: #171717;
+  border: 3px solid red;
+  border-radius: 20px;
+  background-color: #171717;
 }
 
-.startButton, .leaveButton {
-	box-shadow:inset 0px 1px 0px 0px #cf866c;
-	border-radius:3px;
-	display:inline-block;
-	cursor:pointer;
-	color:#ffffff;
-    font-size: 30px;
-    outline: none;
-    padding-left: 10px;
-    padding-right: 10px;
+.startButton,
+.leaveButton {
+  box-shadow: inset 0px 1px 0px 0px #cf866c;
+  border-radius: 3px;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-size: 30px;
+  outline: none;
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .startButton {
-    background-color:#3c56a5;
-    border:1px solid #699fd5;
+  background-color: #3c56a5;
+  border: 1px solid #699fd5;
 }
 
 .leaveButton {
-    background-color:#551414;
-    border:1px solid #ec1f2b;
+  background-color: #551414;
+  border: 1px solid #ec1f2b;
 }
 
 .startButton:hover {
-	background-color:#699fd5;
+  background-color: #699fd5;
 }
 
 .startButton:active {
-	position:relative;
-	top:1px;
-    background: #699fd5; 
+  position: relative;
+  top: 1px;
+  background: #699fd5;
 }
 
 .leaveButton:hover {
-    background: #ec1f2b;
+  background: #ec1f2b;
 }
 
 .leaveButton:active {
-    position: relative;
-    top: 1px;
-    background: #ec1f2b; 
+  position: relative;
+  top: 1px;
+  background: #ec1f2b;
 }
 
 label {
-    color: white;
+  color: white;
 }
 
-.container { 
-    overflow:hidden;
-    padding:10px;
+.container {
+  overflow: hidden;
+  padding: 10px;
 }
 
 ul {
-    list-style-position: inside;
-    color: white;
-    margin: auto;
-    padding: 10px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: x-large;
-    width: 15%;
-    text-align: left;
+  list-style-position: inside;
+  color: white;
+  margin: auto;
+  padding: 10px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: x-large;
+  width: 15%;
+  text-align: left;
 }
 
 .removePlayer {
-    color: red;
-    float: right;
-    cursor: pointer;
+  color: red;
+  float: right;
+  cursor: pointer;
 }
 
 select {
-    position: relative;
+  position: relative;
 }
 
 .blueText {
-    color: blue;
+  color: blue;
 }
 
 #styledSelect {
-    left: 100px;
+  left: 100px;
 }
 
 #searchCardsInput {
-    width: 100%;
-    font-size: 16px;
-    padding: 12px 20px 12px 20px;
-    background-color: #3b3b3b;
-    color: white;
-    margin-bottom: 6px;
-    outline: none;
-    border-radius: 5px;
-    border: none;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 20px;
+  background-color: #3b3b3b;
+  color: white;
+  margin-bottom: 6px;
+  outline: none;
+  border-radius: 5px;
+  border: none;
 }
 #searchCardsInput::placeholder {
-    color: white;
+  color: white;
 }
 
 #cardsList {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    background-color: #3b3b3b;
-    border-radius: 5px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  background-color: #3b3b3b;
+  border-radius: 5px;
 }
 
-
 #cardsList li {
-    display: inline-block;
-    border: 1px solid #ddd;
-    border-right: none;
-    border-left: none;
-    margin-top: -1px;
-    padding: 12px;
-    text-decoration: none;
-    font-size: 25px;
-    color: black;
-    display: block;
+  display: inline-block;
+  border: 1px solid #ddd;
+  border-right: none;
+  border-left: none;
+  margin-top: -1px;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 25px;
+  color: black;
+  display: block;
 }
 
 #cardsList li:hover:not(.header) {
-    background-color: #868686;
+  background-color: #868686;
 }
 
 .card-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
 }
 
 .card {
-    padding: 5px;
-    width: 100%;
-    min-width: 50px;
-    max-width: 100px;
-    margin: auto;
-    margin-top: 0px;
+  padding: 5px;
+  width: 100%;
+  min-width: 50px;
+  max-width: 100px;
+  margin: auto;
+  margin-top: 0px;
 }
 
 *::-webkit-scrollbar {
-    width: 10px;
+  width: 10px;
 }
 *::-webkit-scrollbar-track {
-    background: rgba(0,0,0,0);
+  background: rgba(0, 0, 0, 0);
 }
 *::-webkit-scrollbar-thumb {
-    background-color: white;
-    border-radius: 20px;
-    border: none;
+  background-color: white;
+  border-radius: 20px;
+  border: none;
 }
 
 .cardListImg {
-    height: 100px;
+  height: 100px;
 }
 
 .cardPreviewImg {
-    width: 100%;
-    border-radius: 5px;
+  width: 100%;
+  border-radius: 5px;
 }
 
 .cardDelete {
-    display:none;
-    position:absolute;
-    top:42px;
-    left:25px;
-    width: 50%;
+  display: none;
+  position: absolute;
+  top: 42px;
+  left: 25px;
+  width: 50%;
 }
 
 .card:hover .cardPreviewImg {
-    opacity: 0.5;
+  opacity: 0.5;
 }
 .card:hover .cardDelete {
-    display:block !important;
+  display: block !important;
 }
 
 #hostCardSelection {
-    display:none;
+  display: none;
 }
 
 .setup a {
-    text-decoration: none;
-    color: white;
+  text-decoration: none;
+  color: white;
 }
 
 .setup a:hover {
-    color: white;
+  color: white;
 }
 
 .unselectable {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 #playersInRoom {
-    width: fit-content;
+  width: fit-content;
 }
 
-P {
-    color: white;
-    margin: 0px;
+p {
+  color: white;
+  margin: 0px;
 }
 
 #joinLink {
-    width: 100%;
-    background-color: #171717;
-    outline: none;
-    resize: none;
-    border: none;
-    font-size: 15;
-    color: white;
-    margin: auto;
-    text-align: center;
-    height: 50px;
+  width: 100%;
+  background-color: #171717;
+  outline: none;
+  resize: none;
+  border: none;
+  font-size: x-large;
+  color: white;
+  margin: auto;
+  text-align: center;
+  height: 50px;
 }
 
+.imagetiles,
+.col-lg-3,
+.col-md-3,
+.col-sm-3,
+.col-xs-6 {
+  padding: 0px;
+}
