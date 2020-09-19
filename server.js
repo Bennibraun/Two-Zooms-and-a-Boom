@@ -153,6 +153,7 @@ function createRoom(roomCode) {
     code: roomCode,
     host: "",
     cards: [],
+    gameActive: false,
     subroomA: { players: [], leader: "" },
     subroomB: { players: [], leader: "" },
   });
@@ -233,98 +234,10 @@ app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.get("/join", function (req, res) {
-  var username = req.query.nameInput;
-  var roomCode = req.query.joinCodeInput;
-  var tempName = req.cookies.name;
-
-  //* If player already exists...
-  if (getPlayer(roomCode, username)) {
-    // TODO: maybe make a version of landing page that's identical except for the username taken error
-    res.sendFile(path.join(__dirname, "landing_page.html"));
-    return;
-  }
-
-  //* If room wasn't found...
-  if (!getRoom(roomCode)) {
-    // TODO: maybe make a version of landing page that's identical except for the room not found error
-    console.log("Failed to find room " + roomCode);
-    res.sendFile(path.join(__dirname, "landing_page.html"));
-    return;
-  }
-
-  //* Bake some fresh cookies
-  res.cookie("name", username, { expires: new Date(Date.now() + 100000000) });
-  res.cookie("roomCode", roomCode, {
-    expires: new Date(Date.now() + 100000000),
-  });
-
-  //* If the player hasn't been named and assigned yet, do it here
-  var newPlayer = getNewPlayer(tempName);
-  if (newPlayer) {
-    //* Give proper name
-    newPlayer.name = username;
-    //* Add to proper room
-    getRoom(roomCode).subroomA.players.push(newPlayer);
-    //* Remove from new players list
-    newPlayers = newPlayers.filter(function (p) {
-      return p.name != tempName;
-    });
-  }
-
-  io.to(getPlayer(roomCode, username).clientID).emit("room code", roomCode);
-
-  res.redirect("/");
-});
-
 app.get("/joinCode/:room", function (req, res) {
   res.cookie("roomCode", req.params.room);
   console.log("set room code to " + req.params.room);
   res.redirect("/");
-});
-
-app.get("/play", function (req, res) {
-  //* Assign cards to players randomly
-  //* First, check if all cards in room have been assigned
-  var cardsAlreadyAssigned = true;
-  room.subroomA.players.forEach(function (p) {
-    if (p.card == "") {
-      cardsAlreadyAssigned = false;
-    }
-  });
-
-  if (cardsAlreadyAssigned) {
-    console.log("cards already assigned.");
-  } else {
-    var roomCode = req.cookies.roomCode;
-    var room = getRoom(roomCode);
-    var cards = room.cardsInPlay;
-
-    //* Shuffle the cards
-    for (let i = cards.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * i);
-      const temp = array[i];
-      array[i] = array[j];
-      array[j] = temp;
-    }
-
-    //* Assign and distribute cards
-    var i = 0;
-    room.subroomA.players.forEach(function (p) {
-      p.card = cards[i];
-      io.to(p.clientID).emit("your identity", p);
-      i++;
-    });
-    room.subroomB.players.forEach(function (p) {
-      p.card = cards[i];
-      io.to(p.clientID).emit("your identity", p);
-      i++;
-    });
-  }
-
-  // startTimer(roomCode, 500);
-
-  res.sendFile(path.join(__dirname, "play.html"));
 });
 
 {
@@ -383,7 +296,6 @@ app.get("/play", function (req, res) {
 
 function lobbyRefresh(roomCode) {
   var room = getRoom(roomCode);
-  // TODO: Set up playersingame
   io.to(roomCode).emit("lobby refresh", {
     cardsSelected: room.cards,
     players: getPlayerNames(roomCode),
@@ -454,6 +366,21 @@ io.on("connection", function (socket) {
     if (!data.roomCode || !getRoom(data.roomCode)) {
       console.log("room not found. error.");
       socket.emit("alert", "Room not found. Try again.");
+      return;
+    }
+    //* Prevent duplicate names
+    var myRoom = getRoom(data.roomCode);
+    var nameTaken = false;
+    nameTaken =
+      myRoom.subroomA.players.find(function (p) {
+        return p.name == data.name;
+      }) ||
+      myRoom.subroomB.players.find(function (p) {
+        return p.name == data.name;
+      });
+    if (nameTaken) {
+      console.log("name taken.");
+      socket.emit("alert", "That name is already taken, try another one!");
       return;
     }
 
@@ -550,30 +477,20 @@ io.on("connection", function (socket) {
     lobbyRefresh(data.roomCode);
   });
 
-  // // Remove socket from the lobby
-  // socket.on("leave room", function (data) {
-  //   socket.leave(currentRoom);
-  //   console.log("socket no longer in room");
-  //   // Remove player from lists
-  //   delete players[name];
-  //   // Remove from room if in one
-  //   if (rooms[currentRoom]) {
-  //     rooms[currentRoom].players = rooms[currentRoom].players.filter(function (
-  //       p
-  //     ) {
-  //       if (p != name) {
-  //         return true;
-  //       } else {
-  //         return false;
-  //       }
-  //     });
-  //   }
+  //? Called when a specific user is removed from a room
+  socket.on("leave room", function (data) {
+    socket.leave(data.roomCode);
+    console.log("socket no longer in room");
+    //* Remove player from room
+    deletePlayer(data.roomCode, data.name);
 
-  //   // Update clients
-  //   if (rooms[currentRoom]) {
-  //     io.to(currentRoom).emit("players", rooms[currentRoom].players);
-  //   }
-  // });
+    //* Update clients
+    if (getRoom(data.roomCode).gameActive) {
+      gameRefresh(data.roomCode);
+    } else {
+      lobbyRefresh(data.roomCode);
+    }
+  });
 
   // socket.on("removePlayer", function (playerName) {
   //   delete players[playerName];

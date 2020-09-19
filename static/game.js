@@ -27,17 +27,22 @@ var meesa = {
   //? Refreshes the lobby's info:
   //? -Cards in play
   //? -Players in game
-  //? -Round timers
   socket.on("lobby refresh", function (data) {
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
+    if (
+      !data.players.find(function (p) {
+        return p == meesa.name;
+      })
+    ) {
+      alert("you are no longer in this room.");
+      socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
+    }
   });
 
   //? Sent to host to set identity
   socket.on("you are host", function () {
-    // console.log("user set as host.");
     meesa.host = true;
-
     showHostTools();
   });
 
@@ -118,7 +123,7 @@ function selectCard(cardName) {
     cardName: cardName,
   });
 
-  // //* Mark card as selected with background color
+  //* Mark card as selected with background color
   // var li = $("#cardsList li").filter(function () {
   //   return $(this).children("a")[0].text == cardName;
   // });
@@ -185,8 +190,8 @@ function listPlayers(players) {
   players = players[0].concat(players[1]);
   console.log(players);
   if (meesa.host) {
+    //* Host gets to remove players
     players.forEach(function (p) {
-      console.log(p + " == " + meesa.name);
       if (p == meesa.name) {
         $("<li/>").text(p).appendTo(pList);
       } else {
@@ -202,21 +207,18 @@ function listPlayers(players) {
     });
     $(".removePlayer").each(function () {
       $(this).click(function () {
-        var playerToRemove = $(this).next().text();
-        socket.emit("removePlayer", playerToRemove);
-        // console.log("removed " + playerToRemove);
+        socket.emit("leave room", {
+          roomCode: meesa.roomCode,
+          name: $(this).next().text(),
+        });
+        console.log("removed " + playerToRemove);
       });
     });
   } else {
+    //* Non-hosts don't get to remove players
     players.forEach(function (p) {
       $("<li/>").text(p).appendTo(pList);
     });
-  }
-
-  if (!players.includes(meesa.name)) {
-    console.log("this session has been removed.");
-    //TODO
-    // leaveLobby();
   }
 }
 
