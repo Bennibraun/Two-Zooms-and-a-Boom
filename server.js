@@ -296,6 +296,7 @@ app.get("/joinCode/:room", function (req, res) {
 
 function lobbyRefresh(roomCode) {
   var room = getRoom(roomCode);
+  console.log(getPlayerNames(roomCode));
   io.to(roomCode).emit("lobby refresh", {
     cardsSelected: room.cards,
     players: getPlayerNames(roomCode),
@@ -331,7 +332,9 @@ io.on("connection", function (socket) {
       var player;
       if ((player = getPlayer(roomCode, username))) {
         player.clientID = socket.id;
+        player.roomCode = roomCode;
         socket.emit("your identity", player);
+        socket.emit("room code", roomCode);
         console.log(getRoom(roomCode));
         if (getRoom(roomCode).host == player.name) {
           socket.emit("you are host");

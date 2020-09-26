@@ -47,10 +47,22 @@
                     <input id="submitBtn" type="submit" onclick="joinGameBtn()">
 
                     <script>
+                        $("#nameInput").keyup(function(e){
+                            console.log(e.keyCode)
+                            if(e.keyCode == 13) {
+                                joinGameBtn();
+                            }
+                        });
+
+
                         var roomCode = document.cookie.split('; ').find(row => row.startsWith('roomCode')).split('=')[1];
                         $("#joinCodeInput").val(roomCode);
                         var userName = document.cookie.split('; ').find(row => row.startsWith('name')).split('=')[1];
-                        $("#nameInput").val(username);
+                        if (userName != undefined) {
+                            $("#nameInput").val(userName);
+                            $("#nameInputHost").val(userName);
+                        }
+
                     </script>
 
                 </div>
@@ -74,6 +86,14 @@
                     <label for="nameInputHost">Name</label>
                     <input id="nameInputHost" name="nameInput">
                     <input id="submitBtnHost" type="submit" onclick="hostGameBtn()"></button>
+
+                    <script>
+                        $("#nameInputHost").keyup(function(e){
+                            if(e.keyCode == 13) {
+                                hostGameBtn();
+                            }
+                        });
+                    </script>
 
                 </div>
             </div>

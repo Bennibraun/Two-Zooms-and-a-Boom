@@ -10,6 +10,7 @@ var meesa = {
   clientID: "",
   host: false,
   leader: false,
+  roomCode: "",
 };
 
 //* Proper Code
@@ -21,7 +22,11 @@ var meesa = {
     meesa.name = player.name;
     meesa.card = player.card;
     meesa.clientID = player.clientID;
-    console.log(meesa);
+    meesa.roomCode = console.log(meesa);
+  });
+
+  socket.on("room code", function (roomCode) {
+    meesa.roomCode = roomCode;
   });
 
   //? Refreshes the lobby's info:
@@ -31,11 +36,14 @@ var meesa = {
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
     if (
-      !data.players.find(function (p) {
+      !data.players[0].find(function (p) {
+        return p == meesa.name;
+      }) &&
+      !data.players[1].find(function (p) {
         return p == meesa.name;
       })
     ) {
-      alert("you are no longer in this room.");
+      alert("You aren't in the player list...");
       socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
     }
   });
@@ -79,6 +87,14 @@ var meesa = {
   socket.on("set cookie", function (data) {
     document.cookie =
       data.name + "=" + data.value + "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+    if (data.name == "name") {
+      if ($("#nameInput").val() == "") {
+        $("#nameInput").val(data.value);
+      }
+      if ($("#nameInputHost").val() == "") {
+        $("#nameInputHost").val(data.value);
+      }
+    }
   });
 
   //? Simply sends an alert
@@ -206,6 +222,7 @@ function listPlayers(players) {
       }
     });
     $(".removePlayer").each(function () {
+      socket.emit("alert", "you have been manually removed");
       $(this).click(function () {
         socket.emit("leave room", {
           roomCode: meesa.roomCode,
