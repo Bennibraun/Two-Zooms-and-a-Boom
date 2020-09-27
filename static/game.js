@@ -15,6 +15,8 @@ var meesa = {
 
 var players;
 
+myStorage = window.localStorage;
+
 //* Proper Code
 
 //* Socket listeners
@@ -36,6 +38,7 @@ var players;
   //? -Players in game
   socket.on("lobby refresh", function (data) {
     players = data.players;
+    console.log(data.players);
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
     if (
@@ -77,6 +80,19 @@ var players;
     setTimer(timer.start, timer.length);
   });
 
+  //? Refreshes all info necessary to run the overall game, excluding individual actions
+  socket.on("game refresh", function (game) {
+    //* Determine which room to show
+    var room;
+    if (game.players[0].includes(meesa.name)) {
+      room = 0;
+    } else {
+      room = 1;
+    }
+    drawPlayers(game.players[room]);
+    console.log("refreshed");
+  });
+
   //? Sets the given cookie
   socket.on("set cookie", function (data) {
     console.log(data);
@@ -105,6 +121,8 @@ var players;
 
 //* Functions
 
+//? Begin or synchronize the master timer for this player
+//? Guaranteed to be mostly accurate since it goes by the exact time the universal timer was started
 function setTimer(startTime, length) {
   console.log("setting timer with length " + length);
   var timer = setInterval(function () {
@@ -118,12 +136,14 @@ function setTimer(startTime, length) {
   });
 }
 
+//? Load the current player to the landing page
 function showLandingPage() {
   $("#gamePage").css("display", "none");
   $("#lobbyPage").css("display", "none");
   $("#landingPage").css("display", "");
 }
 
+//? Load the current player into an existing lobby
 function showLobbyPage() {
   $("#landingPage").css("display", "none");
   $("#gamePage").css("display", "none");
@@ -135,6 +155,7 @@ function showLobbyPage() {
   $("#joinLink").text("localhost:5000/joinCode/" + getCookie("roomCode"));
 }
 
+//? Load the current player into an active game
 function showGamePage() {
   $("#landingPage").css("display", "none");
   $("#lobbyPage").css("display", "none");
@@ -144,6 +165,7 @@ function showGamePage() {
   }
 }
 
+//? Join an existing game as a player
 function joinGame(roomCode, username) {
   socket.emit("join room", {
     roomCode: roomCode,
@@ -152,6 +174,7 @@ function joinGame(roomCode, username) {
   });
 }
 
+//? Start a new game as the host
 function hostGame(username) {
   if (meesa.card == "" && !meesa.host) {
     socket.emit("host room", {
@@ -161,6 +184,7 @@ function hostGame(username) {
   }
 }
 
+//? Reveal the host-only game controls
 function showHostTools() {
   //* Show host-only setup and such
 
@@ -174,6 +198,17 @@ function showHostTools() {
   $("#roundSettings").css("display", "");
 }
 
+//? Saves a variable to localStorage
+function saveToStorage(varName, data) {
+  myStorage.setItem(varName, JSON.stringify(data));
+}
+
+//? Retrieve a variable from localStorage
+function getFromStorage(varName) {
+  return JSON.parse(myStorage.getItem(varName));
+}
+
+//? Host selects a card to be added to the game
 function selectCard(cardName) {
   if (!meesa.host) {
     alert("you shouldn't be able to select cards, wtf???");
@@ -191,6 +226,7 @@ function selectCard(cardName) {
   // li.css("background-color", "#1c1c1c");
 }
 
+//? Updates the currently selected cards in the lobby
 function drawCards(cards, players) {
   $("#cardPreviewPane").empty();
   cards.forEach(function (card) {
@@ -245,6 +281,7 @@ function drawCards(cards, players) {
   });
 }
 
+//? Updates the list of players displayed in the lobby
 function listPlayers(players) {
   pList = $("#playersInRoom");
   pList.empty();
@@ -285,13 +322,117 @@ function listPlayers(players) {
   }
 }
 
-//* Initiate the game for the current lobby
+//? Initiate the game for the current lobby
 function startGame() {
   socket.emit("start game", meesa.roomCode);
   showGamePage();
 }
 
-//* Make this player leave the current room entirely and return to the landing page
+//? Refresh the in-game player display
+function drawPlayers(players) {
+  // <div class="col-sm-4 player"><img src="/static/cards/agoraphobe.jpg" class="cardPreviewImg"><a class="unselectable">Agoraphobe</a></a></div>
+  players.forEach(function (p) {
+    $("#playerMenu").append(
+      '<div class="col-sm-4 player" id="' +
+        p +
+        '"><h3>' +
+        p +
+        "</h3>" +
+        '<div class="markOptions">Mark ' +
+        p +
+        " as:<br>" +
+        '<img id="markBlue" class="markBtn" src="/static/cards/card_teams/blue_icon.jpg"/>' +
+        '<img id="markRed" class="markBtn" src="/static/cards/card_teams/red_icon.jpg"/>' +
+        '<img id="markGrey" class="markBtn" src="/static/cards/card_teams/grey_icon.jpg"/>' +
+        '<img id="markGreen" class="markBtn" src="/static/cards/card_teams/green_icon.jpg"/>' +
+        '<br><input type="text" class="markCardInput" placeholder="Search for a card..."><ul id="cardSearchFor' +
+        p +
+        '" class="markCardSearch" style="height:60%;width:95%;overflow:auto;"></ul>' +
+        "</div></div>"
+    );
+  });
+  $(".markCardInput").keyup(function (e) {
+    // $(this).parent().parent().children()[0].innerText
+    markCardSearch("#" + $(this).next()[0].id, $(this).val());
+  });
+
+  $(".player").click(function (e) {
+    e.stopPropagation();
+    if ($("#playerMenu .markOptions").css("visibility") == "hidden") {
+      $("#playerMenu .markOptions").css("visibility", "visible");
+    } else {
+      $("#playerMenu .markOptions").css("visibility", "hidden");
+    }
+  });
+
+  $(".markOptions").click(function (e) {
+    e.stopPropagation();
+  });
+  //* Allow close by clicking anywhere else
+  $(window).click(function () {
+    $("#playerMenu .markOptions").css("visibility", "hidden");
+  });
+}
+
+//? Search for cards by name and print the output to the specified html
+function markCardSearch(htmlID, searchStr) {
+  console.log(searchStr);
+  if (searchStr == "") {
+    $(htmlID).empty();
+    return;
+  }
+  var txtValue, card;
+  var filter = searchStr.toUpperCase();
+  var li = $("#cardsList li");
+  var a = li.children("a");
+
+  // Loop through all list items, and hide those who don't match the search query
+  for (var i = 0; i < li.length; i++) {
+    txtValue = a[i].text;
+    // console.log(txtValue);
+    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+      card = $(li[i]).clone();
+      txtValue = txtValue.replace(/[\s\(\)\'\.]/g, "");
+      $(card).attr("id", txtValue);
+      // console.log($(card).id);
+      // console.log($(card).get(0).outerHTML);
+      // console.log($(htmlID).children("#" + txtValue).length == 0);
+      if ($(htmlID).children("#" + txtValue).length == 0) {
+        // console.log("appending " + txtValue);
+        $(htmlID).append(card);
+      } else {
+        // console.log(txtValue + " already in list");
+        // console.log(card.get(0).outerHTML);
+      }
+    } else {
+      // console.log($(htmlID).children("#" + txtValue));
+      $(htmlID)
+        .children("#" + txtValue.replace(/[\s\(\)\'\.]/g, ""))
+        .remove();
+      // console.log("removed " + txtValue);
+    }
+  }
+
+  //* Add click handler for each card
+  $(htmlID)
+    .children()
+    .click(function () {
+      //* Determine player and card
+      var cardName = $(this).children("a")[0].innerText;
+      var playerName = $(this).parent().parent().parent().children("h3")[0]
+        .innerText;
+      //* Update playerData from localStorage
+      var playerData = getFromStorage("playerData");
+      playerData.forEach(function (p) {
+        if (p.name == playerName) {
+          p.cardGuess = cardName;
+        }
+      });
+      saveToStorage("playerData", playerData);
+    });
+}
+
+//? Make this player leave the current room entirely and return to the landing page
 function leaveLobby() {
   socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
 

@@ -146,7 +146,8 @@ select {
   color: white;
 }
 
-#cardsList {
+#cardsList,
+.markCardSearch {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -155,7 +156,8 @@ select {
   border-radius: 5px;
 }
 
-#cardsList li {
+#cardsList li,
+.markCardSearch li {
   display: inline-block;
   border: 1px solid #ddd;
   border-right: none;
@@ -166,6 +168,22 @@ select {
   font-size: 25px;
   color: black;
   display: block;
+}
+
+.markCardInput {
+  color: black;
+  width: 95%;
+  border-radius: 5px;
+  outline: none;
+}
+
+.markCardSearch {
+  margin: auto;
+}
+
+.markCardSearch li {
+  margin-top: 5px;
+  margin: auto;
 }
 
 #cardsList li:hover:not(.header) {
@@ -188,12 +206,17 @@ select {
 }
 
 .player {
-  padding: 5px;
+  border: 2px solid white;
+  border-radius: 10px;
+  padding: 15px;
   width: 100%;
   min-width: 50px;
   max-width: 20%;
+  min-height: 30%;
+  max-height: 35%;
   margin: auto;
   margin-top: 0px;
+  position: relative;
 }
 
 *::-webkit-scrollbar {
@@ -278,4 +301,37 @@ p {
 .col-sm-3,
 .col-xs-6 {
   padding: 0px;
+}
+
+.markOptions {
+  visibility: hidden;
+  width: 300%;
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 5px;
+  border-radius: 5px;
+  position: absolute;
+  z-index: 1;
+  top: 85%;
+  left: -53%;
+  margin-left: -60px;
+  border: 2px solid white;
+  height: 40vh;
+}
+
+.markOptions::after {
+  content: "";
+  position: absolute;
+  top: -3%;
+  left: 50%;
+  margin-left: -5px;
+  border: 5px solid;
+  border-color: transparent transparent white transparent;
+}
+
+.markBtn {
+  border-radius: 10px;
+  width: 15%;
+  padding: 5px;
 }

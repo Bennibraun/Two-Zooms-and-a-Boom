@@ -309,7 +309,9 @@ function lobbyRefresh(roomCode) {
 }
 
 function gameRefresh(roomCode) {
+  console.log("refreshing " + roomCode);
   timerRefresh(roomCode);
+  io.to(roomCode).emit("game refresh", { players: getPlayerNames(roomCode) });
 }
 
 function timerRefresh(roomCode) {
@@ -358,7 +360,9 @@ io.on("connection", function (socket) {
         if (room.host == player.name) {
           socket.emit("you are host");
         }
+
         socket.join(roomCode);
+
         if (room.gameActive) {
           socket.emit("go to game", "");
           gameRefresh(roomCode);
@@ -544,6 +548,7 @@ io.on("connection", function (socket) {
     room.timerStart = Date.now() / 1000;
     room.timerLengths = [600];
     timerRefresh(roomCode);
+    gameRefresh(roomCode);
   });
 
   // socket.on("removePlayer", function (playerName) {
