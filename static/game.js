@@ -13,16 +13,18 @@ var meesa = {
   roomCode: "",
 };
 
+var players;
+
 //* Proper Code
 
 //* Socket listeners
 {
   //? Tells a player personal info about themself
   socket.on("your identity", function (player) {
+    // console.log(player);
     meesa.name = player.name;
     meesa.card = player.card;
     meesa.clientID = player.clientID;
-    meesa.roomCode = console.log(meesa);
   });
 
   socket.on("room code", function (roomCode) {
@@ -33,6 +35,7 @@ var meesa = {
   //? -Cards in play
   //? -Players in game
   socket.on("lobby refresh", function (data) {
+    players = data.players;
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
     if (
@@ -43,8 +46,8 @@ var meesa = {
         return p == meesa.name;
       })
     ) {
-      alert("You aren't in the player list...");
-      socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
+      alert("You have been removed from the game. Sry m8 😕");
+      leaveLobby();
     }
   });
 
@@ -56,35 +59,27 @@ var meesa = {
 
   //? Tells a player to load into the landing page
   socket.on("go to landing page", function () {
-    $("#gamePage").css("display", "none");
-    $("#lobbyPage").css("display", "none");
-    $("#landingPage").css("display", "");
+    showLandingPage();
   });
 
   //? Tells a player to load into the lobby of their room
   socket.on("go to lobby", function () {
-    $("#landingPage").css("display", "none");
-    $("#gamePage").css("display", "none");
-    $("#lobbyPage").css("display", "");
-    if (meesa.host) {
-      showHostTools();
-    }
-    $("#roomCodeDisplay").text("Room Code: " + getCookie("roomCode"));
-    $("#joinLink").text("localhost:5000/joinCode/" + getCookie("roomCode"));
+    showLobbyPage();
   });
 
   //? Tells a player to load into the active game room
   socket.on("go to game", function () {
-    $("#landingPage").css("display", "none");
-    $("#lobbyPage").css("display", "none");
-    $("#gamePage").css("display", "");
-    if (meesa.host) {
-      showHostTools();
-    }
+    showGamePage();
+  });
+
+  //? Refreshes the current timer to ensure synchronicity
+  socket.on("timer refresh", function (timer) {
+    setTimer(timer.start, timer.length);
   });
 
   //? Sets the given cookie
   socket.on("set cookie", function (data) {
+    console.log(data);
     document.cookie =
       data.name + "=" + data.value + "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
     if (data.name == "name") {
@@ -97,6 +92,11 @@ var meesa = {
     }
   });
 
+  //? Deletes the given cookie
+  socket.on("delete cookie", function (cookieName) {
+    deleteCookie(cookieName);
+  });
+
   //? Simply sends an alert
   socket.on("alert", function (msg) {
     alert(msg);
@@ -104,6 +104,45 @@ var meesa = {
 }
 
 //* Functions
+
+function setTimer(startTime, length) {
+  console.log("setting timer with length " + length);
+  var timer = setInterval(function () {
+    var time = Math.ceil(length - (Date.now() / 1000 - startTime));
+    if (time <= 0) {
+      clearInterval(timer);
+    }
+    var clockText =
+      parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
+    $("#timer").text(clockText);
+  });
+}
+
+function showLandingPage() {
+  $("#gamePage").css("display", "none");
+  $("#lobbyPage").css("display", "none");
+  $("#landingPage").css("display", "");
+}
+
+function showLobbyPage() {
+  $("#landingPage").css("display", "none");
+  $("#gamePage").css("display", "none");
+  $("#lobbyPage").css("display", "");
+  if (meesa.host) {
+    showHostTools();
+  }
+  $("#roomCodeDisplay").text("Room Code: " + getCookie("roomCode"));
+  $("#joinLink").text("localhost:5000/joinCode/" + getCookie("roomCode"));
+}
+
+function showGamePage() {
+  $("#landingPage").css("display", "none");
+  $("#lobbyPage").css("display", "none");
+  $("#gamePage").css("display", "");
+  if (meesa.host) {
+    showHostTools();
+  }
+}
 
 function joinGame(roomCode, username) {
   socket.emit("join room", {
@@ -124,7 +163,13 @@ function hostGame(username) {
 
 function showHostTools() {
   //* Show host-only setup and such
-  $("#hostCardSelection").css("display", "block");
+
+  //* The card selection system
+  $("#cardPreviewRow").css("height", "45%");
+  $("#cardSetupBottom").css("height", "45%");
+  $("#cardSetupBottom").css("display", "block");
+
+  //* Game controls
   $("#startBtnForm").css("display", "");
   $("#roundSettings").css("display", "");
 }
@@ -181,8 +226,8 @@ function drawCards(cards, players) {
 
     //* Indicate card balance
     // TODO: add support for card-burying when necessary
-    console.log(cards);
-    console.log(players);
+    // console.log(cards);
+    // console.log(players);
     var playerCount = players[0].length + players[1].length;
     if (cards.length < playerCount) {
       $("#numCards").text(
@@ -224,9 +269,10 @@ function listPlayers(players) {
     $(".removePlayer").each(function () {
       socket.emit("alert", "you have been manually removed");
       $(this).click(function () {
+        var playerToRemove = $(this).next().text();
         socket.emit("leave room", {
           roomCode: meesa.roomCode,
-          name: $(this).next().text(),
+          name: playerToRemove,
         });
         console.log("removed " + playerToRemove);
       });
@@ -239,11 +285,44 @@ function listPlayers(players) {
   }
 }
 
+//* Initiate the game for the current lobby
+function startGame() {
+  socket.emit("start game", meesa.roomCode);
+  showGamePage();
+}
+
+//* Make this player leave the current room entirely and return to the landing page
+function leaveLobby() {
+  socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
+
+  showLandingPage();
+
+  if (meesa.host) {
+    socket.emit("randomize host", "");
+  }
+
+  deleteCookie("roomCode");
+
+  //* Reset identity
+  meesa = {
+    name: "",
+    card: "",
+    clientID: "",
+    host: false,
+    leader: false,
+    roomCode: "",
+  };
+}
+
 function getCookie(name) {
   return document.cookie
     .split("; ")
     .find((row) => row.startsWith(name))
     .split("=")[1];
+}
+
+function deleteCookie(name) {
+  document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
 
 // socket.on("isPlayer", function (isPlayer) {

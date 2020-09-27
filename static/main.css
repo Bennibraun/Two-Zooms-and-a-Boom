@@ -187,6 +187,15 @@ select {
   margin-top: 0px;
 }
 
+.player {
+  padding: 5px;
+  width: 100%;
+  min-width: 50px;
+  max-width: 20%;
+  margin: auto;
+  margin-top: 0px;
+}
+
 *::-webkit-scrollbar {
   width: 10px;
 }
@@ -221,10 +230,6 @@ select {
 }
 .card:hover .cardDelete {
   display: block !important;
-}
-
-#hostCardSelection {
-  display: none;
 }
 
 .setup a {

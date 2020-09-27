@@ -156,6 +156,9 @@ function createRoom(roomCode) {
     gameActive: false,
     subroomA: { players: [], leader: "" },
     subroomB: { players: [], leader: "" },
+    timerStart: "",
+    timerLengths: [],
+    currentTimer: 0,
   });
 }
 
@@ -249,7 +252,7 @@ app.get("/joinCode/:room", function (req, res) {
   //     console.log(r.subroomB.players);
   //   });
   // }, 5000);
-  // length in seconds
+  // length in seconds;
   // function startTimer(roomCode, length) {
   //   if (timerRunning) {
   //     return;
@@ -257,7 +260,9 @@ app.get("/joinCode/:room", function (req, res) {
   //     timerRunning = true;
   //   }
   //   var start = Date.now() / 1000;
-  //   console.log("telling " + roomCode + " to start a timer of length " + length);
+  //   console.log(
+  //     "telling " + roomCode + " to start a timer of length " + length
+  //   );
   //   io.to(roomCode).emit("start timer", {
   //     timerLength: length,
   //     startTime: start,
@@ -303,6 +308,18 @@ function lobbyRefresh(roomCode) {
   });
 }
 
+function gameRefresh(roomCode) {
+  timerRefresh(roomCode);
+}
+
+function timerRefresh(roomCode) {
+  var room = getRoom(roomCode);
+  io.to(roomCode).emit("timer refresh", {
+    start: room.timerStart,
+    length: room.timerLengths[room.currentTimer],
+  });
+}
+
 // WebSocket handlers
 io.on("connection", function (socket) {
   //? Called anytime a browser connects to the server, even on refresh
@@ -333,13 +350,22 @@ io.on("connection", function (socket) {
       if ((player = getPlayer(roomCode, username))) {
         player.clientID = socket.id;
         player.roomCode = roomCode;
+        console.log("336");
         socket.emit("your identity", player);
         socket.emit("room code", roomCode);
+        var room = getRoom(roomCode);
         console.log(getRoom(roomCode));
-        if (getRoom(roomCode).host == player.name) {
+        if (room.host == player.name) {
           socket.emit("you are host");
         }
-        socket.emit("go to lobby", "");
+        socket.join(roomCode);
+        if (room.gameActive) {
+          socket.emit("go to game", "");
+          gameRefresh(roomCode);
+        } else {
+          socket.emit("go to lobby", "");
+          lobbyRefresh(roomCode);
+        }
         return;
       } else {
         console.log("player not found in room. Making new player.");
@@ -366,6 +392,7 @@ io.on("connection", function (socket) {
   //? Called when the 'join' button is pressed
   socket.on("join room", function (data) {
     //* Find room
+    data.roomCode = data.roomCode.toUpperCase();
     if (!data.roomCode || !getRoom(data.roomCode)) {
       console.log("room not found. error.");
       socket.emit("alert", "Room not found. Try again.");
@@ -410,7 +437,7 @@ io.on("connection", function (socket) {
         "looks like the player who just joined never even existed, wtf?"
       );
     }
-
+    console.log("414");
     socket.emit("your identity", newPlayer);
     socket.emit("room code", data.roomCode);
     socket.emit("go to lobby", "");
@@ -420,7 +447,7 @@ io.on("connection", function (socket) {
   //? Called when the 'host' button is pressed
   socket.on("host room", function (data) {
     //* Random lobby code string
-    var roomCode = Math.random().toString(36).substring(2, 6);
+    var roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
 
     //* Grandma brought some more cookies!
     socket.emit("set cookie", { name: "name", value: data.username });
@@ -450,7 +477,7 @@ io.on("connection", function (socket) {
     } else {
       console.log("Weird, shouldn't be able to get here.");
     }
-
+    console.log("454");
     socket.emit("your identity", newPlayer);
     socket.emit("room code", roomCode);
     socket.emit("you are host", "");
@@ -462,10 +489,19 @@ io.on("connection", function (socket) {
   socket.on("select card", function (data) {
     var room = getRoom(data.roomCode);
     var card = getCard(data.cardName);
+    console.log(data.cardName);
     if (card) {
-      room.cards.push(card);
       console.log(room.cards);
-      lobbyRefresh(data.roomCode);
+      if (
+        room.cards.filter(function (card) {
+          return card.name == data.cardName;
+        }).length < 1
+      ) {
+        // socket.emit("alert", "This card has already been selected.");
+        room.cards.push(card);
+        console.log(room.cards);
+        lobbyRefresh(data.roomCode);
+      }
     } else {
       socket.emit("alert", "Card not found.");
     }
@@ -486,6 +522,11 @@ io.on("connection", function (socket) {
     console.log("socket no longer in room");
     //* Remove player from room
     deletePlayer(data.roomCode, data.name);
+    newPlayers.push({
+      name: data.name,
+      card: "",
+      clientID: socket.id,
+    });
 
     //* Update clients
     if (getRoom(data.roomCode).gameActive) {
@@ -493,6 +534,16 @@ io.on("connection", function (socket) {
     } else {
       lobbyRefresh(data.roomCode);
     }
+  });
+
+  //? Called to begin the game for a specific room
+  socket.on("start game", function (roomCode) {
+    console.log("starting " + roomCode);
+    var room = getRoom(roomCode);
+    room.gameActive = true;
+    room.timerStart = Date.now() / 1000;
+    room.timerLengths = [600];
+    timerRefresh(roomCode);
   });
 
   // socket.on("removePlayer", function (playerName) {
