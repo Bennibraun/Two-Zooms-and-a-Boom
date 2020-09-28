@@ -543,6 +543,7 @@ io.on("connection", function (socket) {
   //? Called to begin the game for a specific room
   socket.on("start game", function (roomCode) {
     console.log("starting " + roomCode);
+    io.to(roomCode).emit("let the game begin", getPlayerNames(roomCode));
     var room = getRoom(roomCode);
     room.gameActive = true;
     room.timerStart = Date.now() / 1000;

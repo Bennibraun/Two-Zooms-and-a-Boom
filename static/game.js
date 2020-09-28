@@ -17,6 +17,119 @@ var players;
 
 myStorage = window.localStorage;
 
+cards = [
+  { name: "Agent (Blue)", color: "blue", url: "agent_blue" },
+  { name: "Agent (Red)", color: "red", url: "agent_red" },
+  { name: "Ambassador (Blue)", color: "blue", url: "ambassador_blue" },
+  { name: "Angel (Blue)", color: "blue", url: "angel_blue" },
+  { name: "Blind (Blue)", color: "blue", url: "blind_blue" },
+  { name: "Bouncer (Blue)", color: "blue", url: "bouncer_blue" },
+  { name: "Clown (Blue)", color: "blue", url: "clown_blue" },
+  { name: "Conman (Blue)", color: "blue", url: "conman_blue" },
+  { name: "Coyboy (Blue)", color: "blue", url: "coyboy_blue" },
+  { name: "Criminal (Blue)", color: "blue", url: "criminal_blue" },
+  { name: "Dealer (Blue)", color: "blue", url: "dealer_blue" },
+  { name: "Blue Team", color: "blue", url: "default_blue" },
+  { name: "Demon (Blue)", color: "blue", url: "demon_blue" },
+  { name: "Doctor (Blue)", color: "blue", url: "doctor_blue" },
+  { name: "Enforcer (Blue)", color: "blue", url: "enforcer_blue" },
+  { name: "Eris (Blue)", color: "blue", url: "eris_blue" },
+  { name: "Mayor (Blue)", color: "blue", url: "mayor_blue" },
+  { name: "Medic (Blue)", color: "blue", url: "medic_blue" },
+  { name: "Mime (Blue)", color: "blue", url: "mime_blue" },
+  { name: "Mummy (Blue)", color: "blue", url: "mummy_blue" },
+  { name: "Negotiator (Blue)", color: "blue", url: "negotiator_blue" },
+  { name: "Nurse (Blue)", color: "blue", url: "nurse_blue" },
+  { name: "Paparazzo (Blue)", color: "blue", url: "paparazzo_blue" },
+  { name: "Paranoid (Blue)", color: "blue", url: "paranoid_blue" },
+  { name: "President (Blue)", color: "blue", url: "president_blue" },
+  {
+    name: "President's Daughter (Blue)",
+    color: "blue",
+    url: "presidentsdaughter_blue",
+  },
+  { name: "Psychologist (Blue)", color: "blue", url: "psychologist_blue" },
+  { name: "Red Spy (Blue)", color: "blue", url: "redspy_blue" },
+  { name: "Security (Blue)", color: "blue", url: "security_blue" },
+  { name: "Shyguy (Blue)", color: "blue", url: "shyguy_blue" },
+  { name: "Thug (Blue)", color: "blue", url: "thug_blue" },
+  { name: "Tuesday Knight (Blue)", color: "blue", url: "tuesdayknight_blue" },
+  { name: "Usurper (Blue)", color: "blue", url: "usurper_blue" },
+  { name: "Ambassador (Red)", color: "red", url: "ambassador_red" },
+  { name: "Angel (Red)", color: "red", url: "angel_red" },
+  { name: "Blue Spy (Red)", color: "red", url: "bluespy_red" },
+  { name: "Bomber (Red)", color: "red", url: "bomber_red" },
+  { name: "Blind (Red)", color: "red", url: "blind_red" },
+  { name: "Bouncer (Red)", color: "red", url: "bouncer_red" },
+  { name: "Clown (Red)", color: "red", url: "clown_red" },
+  { name: " (Red)", color: "red", url: "blind_red" },
+  { name: "Conman (Red)", color: "red", url: "conman_red" },
+  { name: "Coyboy (Red)", color: "red", url: "coyboy_red" },
+  { name: "Criminal (Red)", color: "red", url: "criminal_red" },
+  { name: "Cupid (Red)", color: "red", url: "cupid_red" },
+  { name: "Dealer (Red)", color: "red", url: "dealer_red" },
+  { name: "Red Team", color: "red", url: "default_red" },
+  { name: "Demon (Red)", color: "red", url: "demon_red" },
+  { name: "Dr. Boom (Red)", color: "red", url: "drboom_red" },
+  { name: "Enforcer (Red)", color: "red", url: "enforcer_red" },
+  { name: "Engineer (Red)", color: "red", url: "engineer_red" },
+  { name: "Immunologist (Red)", color: "red", url: "immunologist_red" },
+  { name: "Martyr (Red)", color: "red", url: "martyr_red" },
+  { name: "Mayor (Red)", color: "red", url: "mayor_red" },
+  { name: "Medic (Red)", color: "red", url: "medic_red" },
+  { name: "Mime (Red)", color: "red", url: "mime_red" },
+  { name: "Mummy (Red)", color: "red", url: "mummy_red" },
+  { name: "Negotiator (Red)", color: "red", url: "negotiator_red" },
+  { name: "Paparazzo (Red)", color: "red", url: "paparazzo_red" },
+  { name: "Paranoid (Red)", color: "red", url: "paranoid_red" },
+  { name: "Psychologist (Red)", color: "red", url: "psychologist_red" },
+  { name: "Security (Red)", color: "red", url: "security_red" },
+  { name: "Shyguy (Red)", color: "red", url: "shyguy_red" },
+  { name: "Thug (Red)", color: "red", url: "thug_red" },
+  { name: "Tinkerer (Red)", color: "red", url: "tinkerer_red" },
+  { name: "Usurper (Red)", color: "red", url: "usurper_red" },
+  { name: "Agoraphobe", color: "grey", url: "agoraphobe" },
+  { name: "Ahab", color: "grey", url: "ahab" },
+  { name: "Anarchist", color: "grey", url: "anarchist" },
+  { name: "Bomb Bot", color: "grey", url: "bombbot" },
+  { name: "Butler", color: "grey", url: "butler" },
+  { name: "Clone", color: "grey", url: "clone" },
+  { name: "Decoy", color: "grey", url: "decoy" },
+  { name: "Drunk", color: "grey", url: "drunk" },
+  { name: "Gambler", color: "grey", url: "gambler" },
+  { name: "Hot Potato", color: "grey", url: "hotpotato" },
+  { name: "Intern", color: "grey", url: "intern" },
+  { name: "Invincible", color: "grey", url: "invincible" },
+  { name: "Juliet", color: "grey", url: "juliet" },
+  { name: "Leprechaun (Green)", color: "green", url: "leprechaun_green" },
+  { name: "Maid", color: "grey", url: "maid" },
+  { name: "Mastermind", color: "grey", url: "mastermind" },
+  { name: "MI6", color: "grey", url: "mi6" },
+  { name: "Minion", color: "grey", url: "minion" },
+  { name: "Mistress", color: "grey", url: "mistress" },
+  { name: "Moby", color: "grey", url: "moby" },
+  { name: "Nuclear Tyrant", color: "grey", url: "nucleartyrant" },
+  { name: "Private Eye", color: "grey", url: "privateeye" },
+  { name: "Queen", color: "grey", url: "queen" },
+  { name: "Rival", color: "grey", url: "rival" },
+  { name: "Robot", color: "grey", url: "robot" },
+  { name: "Romeo", color: "grey", url: "romeo" },
+  { name: "Sniper", color: "grey", url: "sniper" },
+  { name: "Survivor", color: "grey", url: "survivor" },
+  { name: "Target", color: "grey", url: "target" },
+  { name: "Traveler", color: "grey", url: "traveler" },
+  { name: "Victim", color: "grey", url: "victim" },
+  { name: "Wife", color: "grey", url: "wife" },
+  { name: "Zombie (Green)", color: "green", url: "zombie_green" },
+];
+
+gen_cards = [
+  { name: "gen_blue", color: "blue", url: "/card_teams/blue_team" },
+  { name: "gen_red", color: "red", url: "/card_teams/red_team" },
+  { name: "gen_grey", color: "grey", url: "/card_teams/grey_team" },
+  { name: "gen_green", color: "green", url: "/card_teams/green_team_l" },
+];
+
 //* Proper Code
 
 //* Socket listeners
@@ -78,6 +191,19 @@ myStorage = window.localStorage;
   //? Refreshes the current timer to ensure synchronicity
   socket.on("timer refresh", function (timer) {
     setTimer(timer.start, timer.length);
+  });
+
+  //? Officially starts the game
+  socket.on("let the game begin", function (players) {
+    var playerData = [];
+    console.log(players);
+    players.forEach(function (subPlayers) {
+      subPlayers.forEach(function (p) {
+        playerData.push({ name: p, cardGuess: "", notes: "" });
+      });
+    });
+    console.log(playerData);
+    saveToStorage("playerData", playerData);
   });
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
@@ -331,13 +457,40 @@ function startGame() {
 //? Refresh the in-game player display
 function drawPlayers(players) {
   // <div class="col-sm-4 player"><img src="/static/cards/agoraphobe.jpg" class="cardPreviewImg"><a class="unselectable">Agoraphobe</a></a></div>
+  // players = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",'N','O','P','Q','R','S','T',"U",'V','W','X','Y','Z'];
+
+  var playerData = getFromStorage("playerData");
+
   players.forEach(function (p) {
+    pID = p.replace(/[^A-Za-z0-9\-_:.]/g, "");
+    var cardName = playerData.filter(function (player) {
+      return player.name == p;
+    })[0].cardGuess;
+    var img_match = gen_cards.filter(function (card) {
+      return card.name == cardName;
+    });
+    if (img_match.length == 0) {
+      img_match = cards.filter(function (card) {
+        return card.name == cardName;
+      });
+      if (img_match.length == 0) {
+        console.log("shouldn't be able to get here, failed to match card.");
+      }
+    }
+    if (img_match[0]) {
+      img_url = ' src="/static/cards' + img_match[0].url + '.jpg"';
+    } else {
+      img_url = "";
+    }
+    $("#playerMenu").empty();
     $("#playerMenu").append(
       '<div class="col-sm-4 player" id="' +
+        pID +
+        '"><h3 style="color: white; position:absolute; z-index:10; left:50%; transform: translate(-50%, -50%);">' +
         p +
-        '"><h3>' +
-        p +
-        "</h3>" +
+        "</h3><img" +
+        img_url +
+        ' style="width:100%; position:absolute; z-index:5; left:0px; top:0px; height:100%; border-radius: 10px;" />' +
         '<div class="markOptions">Mark ' +
         p +
         " as:<br>" +
@@ -346,11 +499,26 @@ function drawPlayers(players) {
         '<img id="markGrey" class="markBtn" src="/static/cards/card_teams/grey_icon.jpg"/>' +
         '<img id="markGreen" class="markBtn" src="/static/cards/card_teams/green_icon.jpg"/>' +
         '<br><input type="text" class="markCardInput" placeholder="Search for a card..."><ul id="cardSearchFor' +
-        p +
+        pID +
         '" class="markCardSearch" style="height:60%;width:95%;overflow:auto;"></ul>' +
         "</div></div>"
     );
   });
+
+  $("#markBlue").click(function (e) {
+    var nameID = $(this).parent().parent()[0].id;
+    //* Update playerData from localStorage
+    var playerData = getFromStorage("playerData");
+    // console.log(playerData);
+    playerData.forEach(function (p) {
+      if (p.name == nameID) {
+        p.cardGuess = "gen_blue";
+      }
+    });
+    saveToStorage("playerData", playerData);
+    drawPlayers(players);
+  });
+
   $(".markCardInput").keyup(function (e) {
     // $(this).parent().parent().children()[0].innerText
     markCardSearch("#" + $(this).next()[0].id, $(this).val());
@@ -358,8 +526,9 @@ function drawPlayers(players) {
 
   $(".player").click(function (e) {
     e.stopPropagation();
-    if ($("#playerMenu .markOptions").css("visibility") == "hidden") {
-      $("#playerMenu .markOptions").css("visibility", "visible");
+    if ($(this).children(".markOptions").css("visibility") == "hidden") {
+      $("#playerMenu .markOptions").css("visibility", "hidden");
+      $(this).children(".markOptions").css("visibility", "visible");
     } else {
       $("#playerMenu .markOptions").css("visibility", "hidden");
     }
@@ -392,7 +561,7 @@ function markCardSearch(htmlID, searchStr) {
     // console.log(txtValue);
     if (txtValue.toUpperCase().indexOf(filter) > -1) {
       card = $(li[i]).clone();
-      txtValue = txtValue.replace(/[\s\(\)\'\.]/g, "");
+      txtValue = txtValue.replace(/[^A-Za-z0-9\-_:.]/g, "");
       $(card).attr("id", txtValue);
       // console.log($(card).id);
       // console.log($(card).get(0).outerHTML);
@@ -407,7 +576,7 @@ function markCardSearch(htmlID, searchStr) {
     } else {
       // console.log($(htmlID).children("#" + txtValue));
       $(htmlID)
-        .children("#" + txtValue.replace(/[\s\(\)\'\.]/g, ""))
+        .children("#" + txtValue.replace(/[^A-Za-z0-9\-_:.]/g, ""))
         .remove();
       // console.log("removed " + txtValue);
     }
@@ -417,6 +586,7 @@ function markCardSearch(htmlID, searchStr) {
   $(htmlID)
     .children()
     .click(function () {
+      console.log($(this));
       //* Determine player and card
       var cardName = $(this).children("a")[0].innerText;
       var playerName = $(this).parent().parent().parent().children("h3")[0]
