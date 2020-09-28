@@ -195,6 +195,7 @@ gen_cards = [
 
   //? Officially starts the game
   socket.on("let the game begin", function (players) {
+    //* Create localStorage system for player menu
     var playerData = [];
     console.log(players);
     players.forEach(function (subPlayers) {
@@ -204,6 +205,9 @@ gen_cards = [
     });
     console.log(playerData);
     saveToStorage("playerData", playerData);
+
+    //* Navigate to game room
+    showGamePage();
   });
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
@@ -461,6 +465,8 @@ function drawPlayers(players) {
 
   var playerData = getFromStorage("playerData");
 
+  $("#playerMenu").empty();
+
   players.forEach(function (p) {
     pID = p.replace(/[^A-Za-z0-9\-_:.]/g, "");
     var cardName = playerData.filter(function (player) {
@@ -474,23 +480,24 @@ function drawPlayers(players) {
         return card.name == cardName;
       });
       if (img_match.length == 0) {
-        console.log("shouldn't be able to get here, failed to match card.");
+        console.log(
+          "No card match found to display. Fine if none was selected."
+        );
       }
     }
     if (img_match[0]) {
-      img_url = ' src="/static/cards' + img_match[0].url + '.jpg"';
+      img_url = ' src="/static/cards/' + img_match[0].url + '.jpg"';
     } else {
-      img_url = "";
+      img_url = ' src="/static/cards/card_teams/drunk_team.jpg"';
     }
-    $("#playerMenu").empty();
     $("#playerMenu").append(
       '<div class="col-sm-4 player" id="' +
         pID +
-        '"><h3 style="color: white; position:absolute; z-index:10; left:50%; transform: translate(-50%, -50%);">' +
+        '"><div class="row" style="margin: 0px"><div class="col-sm-3" style="display: inline-block; padding: 0px; margin: auto;"><div class="interactBtns" style="float: right;"><button class="colorShareBtn">🌈 🔁</button><button class="cardShareBtn">🃏 🔁</button></div><h3 style="color: white; writing-mode: tb-rl; transform: rotate(-180deg); float:right; margin:0px;">' +
         p +
-        "</h3><img" +
+        '&nbsp</h3></div><div class="col-sm-9" style="padding: 0px;"><img class="cardGuess"' +
         img_url +
-        ' style="width:100%; position:absolute; z-index:5; left:0px; top:0px; height:100%; border-radius: 10px;" />' +
+        "/></div></div>" +
         '<div class="markOptions">Mark ' +
         p +
         " as:<br>" +
@@ -498,6 +505,7 @@ function drawPlayers(players) {
         '<img id="markRed" class="markBtn" src="/static/cards/card_teams/red_icon.jpg"/>' +
         '<img id="markGrey" class="markBtn" src="/static/cards/card_teams/grey_icon.jpg"/>' +
         '<img id="markGreen" class="markBtn" src="/static/cards/card_teams/green_icon.jpg"/>' +
+        '<img id="markUnknown" class="markBtn" src="/static/cards/card_teams/unknown_icon.jpg"/>' +
         '<br><input type="text" class="markCardInput" placeholder="Search for a card..."><ul id="cardSearchFor' +
         pID +
         '" class="markCardSearch" style="height:60%;width:95%;overflow:auto;"></ul>' +
@@ -505,14 +513,35 @@ function drawPlayers(players) {
     );
   });
 
-  $("#markBlue").click(function (e) {
+  $(".markBtn").click(function (e) {
+    var cardGuess;
+    var markID = $(this).attr("id");
+    switch (markID) {
+      case "markBlue":
+        cardGuess = "gen_blue";
+        break;
+      case "markRed":
+        cardGuess = "gen_red";
+        break;
+      case "markGrey":
+        cardGuess = "gen_grey";
+        break;
+      case "markGreen":
+        cardGuess = "gen_green";
+        break;
+      case "markUnknown":
+        cardGuess = "unknown";
+        break;
+      default:
+        cardGuess = "";
+    }
     var nameID = $(this).parent().parent()[0].id;
     //* Update playerData from localStorage
     var playerData = getFromStorage("playerData");
     // console.log(playerData);
     playerData.forEach(function (p) {
       if (p.name == nameID) {
-        p.cardGuess = "gen_blue";
+        p.cardGuess = cardGuess;
       }
     });
     saveToStorage("playerData", playerData);
@@ -521,7 +550,7 @@ function drawPlayers(players) {
 
   $(".markCardInput").keyup(function (e) {
     // $(this).parent().parent().children()[0].innerText
-    markCardSearch("#" + $(this).next()[0].id, $(this).val());
+    markCardSearch("#" + $(this).next()[0].id, $(this).val(), players);
   });
 
   $(".player").click(function (e) {
@@ -537,6 +566,9 @@ function drawPlayers(players) {
   $(".markOptions").click(function (e) {
     e.stopPropagation();
   });
+  $(".interactBtns").click(function (e) {
+    e.stopPropagation();
+  });
   //* Allow close by clicking anywhere else
   $(window).click(function () {
     $("#playerMenu .markOptions").css("visibility", "hidden");
@@ -544,7 +576,7 @@ function drawPlayers(players) {
 }
 
 //? Search for cards by name and print the output to the specified html
-function markCardSearch(htmlID, searchStr) {
+function markCardSearch(htmlID, searchStr, players) {
   console.log(searchStr);
   if (searchStr == "") {
     $(htmlID).empty();
@@ -557,11 +589,16 @@ function markCardSearch(htmlID, searchStr) {
 
   // Loop through all list items, and hide those who don't match the search query
   for (var i = 0; i < li.length; i++) {
-    txtValue = a[i].text;
+    cardName = a[i].text;
+    txtValue = cardName.replace(/[^A-Za-z0-9\-_:]/g, "");
     // console.log(txtValue);
-    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+
+    if (cardName == "Dr. Boom (Red)") {
+      console.log("Dr boom here!!!!");
+    }
+    if (cardName.toUpperCase().indexOf(filter) > -1) {
       card = $(li[i]).clone();
-      txtValue = txtValue.replace(/[^A-Za-z0-9\-_:.]/g, "");
+      txtValue = txtValue;
       $(card).attr("id", txtValue);
       // console.log($(card).id);
       // console.log($(card).get(0).outerHTML);
@@ -576,9 +613,9 @@ function markCardSearch(htmlID, searchStr) {
     } else {
       // console.log($(htmlID).children("#" + txtValue));
       $(htmlID)
-        .children("#" + txtValue.replace(/[^A-Za-z0-9\-_:.]/g, ""))
+        .children("#" + txtValue)
         .remove();
-      // console.log("removed " + txtValue);
+      console.log("removed " + txtValue);
     }
   }
 
@@ -589,8 +626,7 @@ function markCardSearch(htmlID, searchStr) {
       console.log($(this));
       //* Determine player and card
       var cardName = $(this).children("a")[0].innerText;
-      var playerName = $(this).parent().parent().parent().children("h3")[0]
-        .innerText;
+      var playerName = $(this).parent().attr("id").replace("cardSearchFor", "");
       //* Update playerData from localStorage
       var playerData = getFromStorage("playerData");
       playerData.forEach(function (p) {
@@ -599,6 +635,7 @@ function markCardSearch(htmlID, searchStr) {
         }
       });
       saveToStorage("playerData", playerData);
+      drawPlayers(players);
     });
 }
 
