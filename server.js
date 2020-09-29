@@ -770,7 +770,7 @@ io.on("connection", function (socket) {
       room.currentRound += 1;
       io.to(roomCode).emit("timer refresh", {
         start: Date.now() / 1000,
-        length: room.timerLengths[currentRound - 1],
+        length: room.timerLengths[room.currentRound - 1],
       });
 
       gameRefresh(roomCode);

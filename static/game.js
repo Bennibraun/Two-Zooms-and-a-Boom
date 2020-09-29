@@ -277,22 +277,27 @@ gen_cards = [
     var myRoom = $("#myRoomLeader");
     var otherRoom = $("#otherRoomLeader");
 
-    if (players[0].includes(meesa.name)) {
-      if (players[0].includes(data.subroomA)) {
-        myRoom.text("My Room Leader: " + data.subroomA);
-        otherRoom.text("Other Room Leader: " + data.subroomB);
-      } else {
-        myRoom.text("My Room Leader: " + data.subroomB);
-        otherRoom.text("Other Room Leader: " + data.subroomA);
-      }
-    } else {
-      if (players[1].includes(data.subroomA)) {
-        myRoom.text("My Room Leader: " + data.subroomA);
-        otherRoom.text("Other Room Leader: " + data.subroomB);
-      } else {
-        myRoom.text("My Room Leader: " + data.subroomB);
-        otherRoom.text("Other Room Leader: " + data.subroomA);
-      }
+    if (players[0].includes(meesa.name) && players[0].includes(data.subroomA)) {
+      myRoom.text("My Room Leader: " + data.subroomA);
+      otherRoom.text("Other Room Leader: " + data.subroomB);
+    } else if (
+      players[1].includes(meesa.name) &&
+      players[1].includes(data.subroomA)
+    ) {
+      myRoom.text("My Room Leader: " + data.subroomA);
+      otherRoom.text("Other Room Leader: " + data.subroomB);
+    } else if (
+      players[0].includes(meesa.name) &&
+      players[0].includes(data.subroomB)
+    ) {
+      myRoom.text("My Room Leader: " + data.subroomB);
+      otherRoom.text("Other Room Leader: " + data.subroomA);
+    } else if (
+      players[1].includes(meesa.name) &&
+      players[1].includes(data.subroomB)
+    ) {
+      myRoom.text("My Room Leader: " + data.subroomB);
+      otherRoom.text("Other Room Leader: " + data.subroomA);
     }
 
     //* If one of them hasn't been set, must preserve "unset" status
@@ -473,6 +478,13 @@ gen_cards = [
     }
   });
 
+  //? Ends the game
+  socket.on("game over", function () {
+    alert(
+      "Game Over! You guys can figure out who won, I ain't programming that shit in"
+    );
+  });
+
   //? Sets the given cookie
   socket.on("set cookie", function (data) {
     document.cookie =
@@ -508,16 +520,14 @@ function setTimer(startTime, length) {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
       if (meesa.name == players[0][0]) {
-        socket.emit("timer done", { roomCode: roomCode });
+        socket.emit("timer done", meesa.roomCode);
       }
       clearInterval(timer);
       $("#timer").text("⏰ Round Over");
     }
     var clockText =
       parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
-    $("#timer").text(
-      "⏱️ " + clockText + "&nbsp&nbsp&nbsp Round: " + currentRound
-    );
+    $("#timer").text("⏱️ " + clockText + "  (" + currentRound + ")");
   }, 200);
 }
 
