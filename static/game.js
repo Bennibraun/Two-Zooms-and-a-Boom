@@ -148,6 +148,11 @@ gen_cards = [
     meesa.card = card;
   });
 
+  //? Utility for telling this player about another player's card
+  socket.on("card info", function (data) {
+    changeGuess(data.playerName, data.cardName);
+  });
+
   //? Tells a player his own room code for comms
   socket.on("room code", function (roomCode) {
     meesa.roomCode = roomCode;
@@ -226,7 +231,10 @@ gen_cards = [
 
   //? Someone wants to color share
   socket.on("color share offer", function (from) {
-    if (confirm(from + " would like to color share with you, do you accept?")) {
+    if (
+      meesa.card.name == "Leprechaun (Green)" ||
+      confirm(from + " would like to color share with you, do you accept?")
+    ) {
       socket.emit("accept color share", {
         self: meesa.name,
         target: from,
@@ -250,36 +258,51 @@ gen_cards = [
     $("#shareCardImg").attr("src", cardUrl);
     $("#otherCardName").text(data.target);
 
-    //* Update playerData from localStorage
-    switch (data.color) {
-      case "blue":
-        cardGuess = "gen_blue";
-        break;
-      case "red":
-        cardGuess = "gen_red";
-        break;
-      case "grey":
-        cardGuess = "gen_grey";
-        break;
-      case "green":
-        cardGuess = "gen_green";
-        break;
-      default:
-        cardGuess = "";
-    }
-    var playerData = getFromStorage("playerData");
-    playerData.forEach(function (p) {
-      if (p.name == data.target) {
-        p.cardGuess = cardGuess;
+    //* Special cases
+    if (meesa.card.name == "Hot Potato") {
+      //* Must trade cards
+      socket.emit("trade cards", {
+        roomCode: meesa.roomCode,
+        self: meesa.name,
+        target: data.target,
+      });
+      changeGuess(data.target, meesa.card.name);
+    } else if (meesa.card.name == "Leprechaun") {
+      //* Must trade cards
+      socket.emit("trade cards", {
+        roomCode: meesa.roomCode,
+        self: meesa.name,
+        target: data.target,
+      });
+      changeGuess(data.target, meesa.card.name);
+    } else {
+      var cardGuess;
+      switch (data.color) {
+        case "blue":
+          cardGuess = "gen_blue";
+          break;
+        case "red":
+          cardGuess = "gen_red";
+          break;
+        case "grey":
+          cardGuess = "gen_grey";
+          break;
+        case "green":
+          cardGuess = "gen_green";
+          break;
+        default:
+          cardGuess = "";
       }
-    });
-    saveToStorage("playerData", playerData);
-    drawPlayers(players);
+      changeGuess(data.target, cardGuess);
+    }
   });
 
   //? Someone wants to card share
   socket.on("card share offer", function (from) {
-    if (confirm(from + " would like to card share with you, do you accept?")) {
+    if (
+      meesa.card.name == "Leprechaun (Green)" ||
+      confirm(from + " would like to card share with you, do you accept?")
+    ) {
       socket.emit("accept card share", {
         self: meesa.name,
         target: from,
@@ -298,15 +321,43 @@ gen_cards = [
     $("#shareCardImg").attr("src", cardUrl);
     $("#otherCardName").text(data.target);
 
-    //* Update playerData from localStorage
-    var playerData = getFromStorage("playerData");
-    playerData.forEach(function (p) {
-      if (p.name == data.target) {
-        p.cardGuess = data.cardName;
+    //* Special cases
+    if (meesa.card.name == "Hot Potato") {
+      //* Must trade cards
+      socket.emit("trade cards", {
+        roomCode: meesa.roomCode,
+        self: meesa.name,
+        target: data.target,
+      });
+      changeGuess(data.target, meesa.card.name);
+    } else if (meesa.card.name == "Leprechaun") {
+      //* Must trade cards
+      socket.emit("trade cards", {
+        roomCode: meesa.roomCode,
+        self: meesa.name,
+        target: data.target,
+      });
+      changeGuess(data.target, meesa.card.name);
+    } else {
+      var cardGuess;
+      switch (data.color) {
+        case "blue":
+          cardGuess = "gen_blue";
+          break;
+        case "red":
+          cardGuess = "gen_red";
+          break;
+        case "grey":
+          cardGuess = "gen_grey";
+          break;
+        case "green":
+          cardGuess = "gen_green";
+          break;
+        default:
+          cardGuess = "";
       }
-    });
-    saveToStorage("playerData", playerData);
-    drawPlayers(players);
+      changeGuess(data.target, cardGuess);
+    }
   });
 
   //? Sets the given cookie
@@ -553,6 +604,7 @@ function drawPlayers(players) {
   $("#yourCardName").text(meesa.card.name);
 
   var playerData = getFromStorage("playerData");
+  // console.log(playerData);
 
   // // console.log(playerData);
 
@@ -810,6 +862,18 @@ function leaveLobby() {
     leader: false,
     roomCode: "",
   };
+}
+
+//? Change the guess for a specific player's card
+function changeGuess(playerName, cardGuess) {
+  var playerData = getFromStorage("playerData");
+  playerData.forEach(function (p) {
+    if (p.name == playerName) {
+      p.cardGuess = cardGuess;
+    }
+  });
+  saveToStorage("playerData", playerData);
+  drawPlayers(players);
 }
 
 function getCookie(name) {

@@ -646,6 +646,29 @@ io.on("connection", function (socket) {
     });
   });
 
+  socket.on("trade cards", function (data) {
+    p1 = getPlayer(data.roomCode, data.self);
+    p2 = getPlayer(data.roomCode, data.target);
+
+    var tempCard = p1.card;
+    p1.card = p2.card;
+    p2.card = tempCard;
+    console.log(
+      data.self + " and " + data.target + "'s cards have been traded."
+    );
+    io.to(p1.clientID).emit("your card", p1.card);
+    io.to(p1.clientID).emit("card info", {
+      playerName: p2.name,
+      cardName: p2.card.name,
+    });
+    io.to(p2.clientID).emit("your card", p2.card);
+    io.to(p2.clientID).emit("card info", {
+      playerName: p1.name,
+      cardName: p1.card.name,
+    });
+    gameRefresh(data.roomCode);
+  });
+
   // socket.on("removePlayer", function (playerName) {
   //   delete players[playerName];
   //   // Remove from room if in one
