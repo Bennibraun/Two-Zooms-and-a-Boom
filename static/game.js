@@ -220,8 +220,93 @@ gen_cards = [
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
   socket.on("game refresh", function (game) {
+    players = game.players;
     drawPlayers(game.players);
-    // console.log("refreshed");
+  });
+
+  //? Someone wants to color share
+  socket.on("color share offer", function (from) {
+    if (confirm(from + " would like to color share with you, do you accept?")) {
+      socket.emit("accept color share", {
+        self: meesa.name,
+        target: from,
+        roomCode: meesa.roomCode,
+      });
+    }
+  });
+
+  //? Carry out the color share
+  socket.on("color share complete", function (data) {
+    var cardUrl = gen_cards.find(function (c) {
+      return c.color == data.color;
+    });
+    if (!cardUrl) {
+      cardUrl = cards.find(function (c) {
+        return c.color == data.color;
+      });
+    }
+    cardUrl = "/static/cards/" + cardUrl.url + ".jpg";
+
+    $("#shareCardImg").attr("src", cardUrl);
+    $("#otherCardName").text(data.target);
+
+    //* Update playerData from localStorage
+    switch (data.color) {
+      case "blue":
+        cardGuess = "gen_blue";
+        break;
+      case "red":
+        cardGuess = "gen_red";
+        break;
+      case "grey":
+        cardGuess = "gen_grey";
+        break;
+      case "green":
+        cardGuess = "gen_green";
+        break;
+      default:
+        cardGuess = "";
+    }
+    var playerData = getFromStorage("playerData");
+    playerData.forEach(function (p) {
+      if (p.name == data.target) {
+        p.cardGuess = cardGuess;
+      }
+    });
+    saveToStorage("playerData", playerData);
+    drawPlayers(players);
+  });
+
+  //? Someone wants to card share
+  socket.on("card share offer", function (from) {
+    if (confirm(from + " would like to card share with you, do you accept?")) {
+      socket.emit("accept card share", {
+        self: meesa.name,
+        target: from,
+        roomCode: meesa.roomCode,
+      });
+    }
+  });
+
+  //? Carry out the card share
+  socket.on("card share complete", function (data) {
+    var cardUrl = cards.find(function (c) {
+      return c.name == data.cardName;
+    });
+    cardUrl = "/static/cards/" + cardUrl.url + ".jpg";
+
+    $("#shareCardImg").attr("src", cardUrl);
+    $("#otherCardName").text(data.target);
+
+    //* Update playerData from localStorage
+    var playerData = getFromStorage("playerData");
+    playerData.forEach(function (p) {
+      if (p.name == data.target) {
+        p.cardGuess = data.cardName;
+      }
+    });
+    saveToStorage("playerData", playerData);
+    drawPlayers(players);
   });
 
   //? Sets the given cookie
@@ -475,6 +560,9 @@ function drawPlayers(players) {
   $("#playerMenuOut").empty();
 
   allPlayers = players[0].concat(players[1]);
+  allPlayers = allPlayers.filter(function (p) {
+    return p != meesa.name;
+  });
   // // console.log(allPlayers);
 
   var myRoom;
@@ -605,6 +693,24 @@ function drawPlayers(players) {
   //* Allow close by clicking anywhere else
   $(window).click(function () {
     $(".markOptions").css("visibility", "hidden");
+  });
+
+  $(".colorShareBtn").click(function () {
+    var target = $(this).parent().parent().children("h3")[0].innerText;
+    socket.emit("request color share", {
+      self: meesa.name,
+      target: target,
+      roomCode: meesa.roomCode,
+    });
+  });
+
+  $(".cardShareBtn").click(function () {
+    var target = $(this).parent().parent().children("h3")[0].innerText;
+    socket.emit("request card share", {
+      self: meesa.name,
+      target: target,
+      roomCode: meesa.roomCode,
+    });
   });
 }
 

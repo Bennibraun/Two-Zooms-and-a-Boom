@@ -418,3 +418,12 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.bigCard {
+  max-width: 400px;
+  width: 100%;
+  padding: 5px;
+  padding-bottom: 0px;
+  border-radius: 15px;
+  -webkit-box-reflect: below 0px -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(95%, transparent), to(rgb(250, 250, 250)));
+}

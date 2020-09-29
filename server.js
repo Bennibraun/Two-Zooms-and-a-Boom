@@ -608,6 +608,44 @@ io.on("connection", function (socket) {
     getRoom(data.roomCode).buryCard = data.buryCard;
   });
 
+  socket.on("request color share", function (data) {
+    console.log(data.self + " would like to color share with " + data.target);
+    var target = getPlayer(data.roomCode, data.target);
+    io.to(target.clientID).emit("color share offer", data.self);
+  });
+
+  socket.on("accept color share", function (data) {
+    var target = getPlayer(data.roomCode, data.target);
+    var self = getPlayer(data.roomCode, data.self);
+    io.to(target.clientID).emit("color share complete", {
+      target: data.self,
+      color: self.card.color,
+    });
+    io.to(self.clientID).emit("color share complete", {
+      target: data.target,
+      color: target.card.color,
+    });
+  });
+
+  socket.on("request card share", function (data) {
+    console.log(data.self + " would like to card share with " + data.target);
+    var target = getPlayer(data.roomCode, data.target);
+    io.to(target.clientID).emit("card share offer", data.self);
+  });
+
+  socket.on("accept card share", function (data) {
+    var target = getPlayer(data.roomCode, data.target);
+    var self = getPlayer(data.roomCode, data.self);
+    io.to(target.clientID).emit("card share complete", {
+      target: data.self,
+      cardName: self.card.name,
+    });
+    io.to(self.clientID).emit("card share complete", {
+      target: data.target,
+      cardName: target.card.name,
+    });
+  });
+
   // socket.on("removePlayer", function (playerName) {
   //   delete players[playerName];
   //   // Remove from room if in one

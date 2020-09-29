@@ -244,7 +244,7 @@
                             <li><img src="/static/cards/zombie_green.jpg" class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Zombie (Green)</a></li>
                         </ul>
                         
-                        
+
                         <script>
                             function cardSearch() {
                                 var input, filter, ul, li, a, i, txtValue;
@@ -413,7 +413,7 @@
         <div class="row">
             <div class="col-sm-3">
                 <div>
-                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 100%; padding: 5px; border-radius: 10px;" />
+                    <img id="playerCardImg" class="bigCard" src="/static/cards/cardback.jpg" />
                 </div>
                 <div>
                     <h1 id="yourCardName">YOUR CARD</h1>
@@ -445,7 +445,7 @@
 
             <div class="col-sm-3">
                 <div>
-                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 100%; padding: 5px; border-radius: 10px;" />
+                    <img id="shareCardImg" class="bigCard" src="/static/cards/cardback.jpg" />
                 </div>
                 <div>
                     <h1 id="otherCardName">TARGET'S CARD</h1>
@@ -455,7 +455,7 @@
     </div>
 
     <!-- Cookie Consent -->
-    <div id="cookieBanner" style="background-color: black; position:absolute; bottom:0;">
+    <!-- <div id="cookieBanner" style="background-color: black; position:absolute; bottom:0;">
         <h4>Click the blue button</h4>
         <p style="margin-left:30%;margin-right:30%;">Hey guys. Cookie Monster here. Hope you don't mind if I store some of my cookies on your computer for later. The European Union recently caught onto my cookie scheme so now I have to ask for permission. Oh, btw, if you don't click the button I won't let you play the game. So just don't think about it too much and just click that blue button down there. Go ahead. Why are you still reading this? Click it already!</p>
         <button onclick="consentGiven()" class="btn btn-primary" style="margin:15px;">Dude, do I really have to click this</button>
@@ -469,7 +469,7 @@
             document.cookie = "cookieConsent=true";
             $("#cookieBanner").remove();
         }
-    </script>
+    </script> -->
     <!-- End Cookie Consent -->
 
     <script src="/static/game.js"></script>
