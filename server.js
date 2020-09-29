@@ -153,6 +153,7 @@ function createRoom(roomCode) {
     code: roomCode,
     host: "",
     cards: [],
+    buryCard: false,
     gameActive: false,
     subroomA: { players: [], leader: "" },
     subroomB: { players: [], leader: "" },
@@ -302,10 +303,11 @@ app.get("/joinCode/:room", function (req, res) {
 function lobbyRefresh(roomCode) {
   var room = getRoom(roomCode);
   console.log(getPlayerNames(roomCode));
-  io.to(roomCode).emit("lobby refresh", {
+  io.in(roomCode).emit("lobby refresh", {
     cardsSelected: room.cards,
     players: getPlayerNames(roomCode),
   });
+  console.log("lobby refreshed " + roomCode);
 }
 
 function gameRefresh(roomCode) {
@@ -459,7 +461,6 @@ io.on("connection", function (socket) {
 
     //* Create the room
     createRoom(roomCode);
-
     socket.join(roomCode);
 
     //* If the player hasn't been named and assigned yet, do it here
@@ -522,7 +523,6 @@ io.on("connection", function (socket) {
 
   //? Called when a specific user is removed from a room
   socket.on("leave room", function (data) {
-    socket.leave(data.roomCode);
     console.log("socket no longer in room");
     //* Remove player from room
     deletePlayer(data.roomCode, data.name);
@@ -531,6 +531,10 @@ io.on("connection", function (socket) {
       card: "",
       clientID: socket.id,
     });
+
+    if (data.leaveSocketRoom) {
+      socket.leave(data.roomCode);
+    }
 
     //* Update clients
     if (getRoom(data.roomCode).gameActive) {
@@ -543,13 +547,65 @@ io.on("connection", function (socket) {
   //? Called to begin the game for a specific room
   socket.on("start game", function (roomCode) {
     console.log("starting " + roomCode);
-    io.to(roomCode).emit("let the game begin", getPlayerNames(roomCode));
     var room = getRoom(roomCode);
+
+    //* Check card selection
+    // console.log(room.cards);
+    var cardCount = room.subroomA.players.length + room.subroomB.players.length;
+    if (room.buryCard) {
+      cardCount += 1;
+    }
+    // console.log(cardCount);
+    if (cardCount != room.cards.length) {
+      console.log("Wrong number of cards. Not starting.");
+      socket.emit("alert", "Invalid number of cards.");
+      return;
+    }
+
+    io.to(roomCode).emit("let the game begin", getPlayerNames(roomCode));
+
+    //* Shuffle cards
+    for (var i = room.cards.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * i);
+      const temp = room.cards[i];
+      room.cards[i] = room.cards[j];
+      room.cards[j] = temp;
+    }
+
+    //* Distribute cards
+    for (var i = 0; i < room.subroomA.players.length; i++) {
+      room.subroomA.players[i].card = room.cards[i];
+      // console.log("room.cards[i] ");
+      // console.log(room.cards[i]);
+    }
+    var playerList = room.subroomA.players.concat(room.subroomB.players);
+    for (var i = 0; i < playerList.length; i++) {
+      player = getPlayer(roomCode, playerList[i].name);
+      // console.log("player ");
+      // console.log(player);
+      io.to(player.clientID).emit("your card", player.card);
+    }
+
+    //* Randomly split rooms
+    for (var i = room.subroomA.players.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * i);
+      const temp = room.subroomA.players[i];
+      room.subroomA.players[i] = room.subroomA.players[j];
+      room.subroomA.players[j] = temp;
+    }
+    var half = Math.ceil(room.subroomA.players.length / 2);
+    room.subroomB.players = room.subroomA.players.splice(-half);
+    room.subroomA.players = room.subroomA.players.splice(0, half);
+
     room.gameActive = true;
     room.timerStart = Date.now() / 1000;
     room.timerLengths = [600];
     timerRefresh(roomCode);
     gameRefresh(roomCode);
+  });
+
+  socket.on("bury card setting", function (data) {
+    getRoom(data.roomCode).buryCard = data.buryCard;
   });
 
   // socket.on("removePlayer", function (playerName) {

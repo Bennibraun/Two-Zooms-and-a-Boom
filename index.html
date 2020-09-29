@@ -244,7 +244,7 @@
                             <li><img src="/static/cards/zombie_green.jpg" class="cardListImg">&nbsp;&nbsp;&nbsp;<a class="unselectable">Zombie (Green)</a></li>
                         </ul>
                         
-
+                        
                         <script>
                             function cardSearch() {
                                 var input, filter, ul, li, a, i, txtValue;
@@ -297,7 +297,7 @@
                 <h3 id="roomCodeDisplay">Room Code Placeholder</h3>
                 <h1>PLAYERS</h1>
                 <ul id="playersInRoom"></ul>
-                <button class="startButton" onclick="startGame()">START</button>
+                <button class="startButton" style="display:none;" onclick="startGame()">START</button>
                 <button class="leaveButton" onclick="leaveLobby()">LEAVE GAME</button>
 
                 <br><br><br>
@@ -310,12 +310,13 @@
 
             <!-- ROUNDS column -->
             <div id="roundSettings" class="col-sm-4 whiteBorder" style="display: none;">
-                <h1>ROUNDS</h1>
+                <h1>SETTINGS</h1>
 
                     <div class="pure">
                         <form class="pure-form-inline">
+                            <h2>TIMER</h2>
                             <div class="pure-control-group">
-                                <h2>ROUND ONE:</h2>
+                                <h3>ROUND ONE:</h3>
                                 <select class="form-control" style="font-size: 20px;">
                                     <option value="5" selected="selected">5 minutes</option>
                                     <option value="4">4 minutes</option>
@@ -325,7 +326,7 @@
                                 </select>
                             </div>
                             <div class="pure-control-group">
-                                <h2>ROUND TWO:</h2>
+                                <h3>ROUND TWO:</h3>
                                 <select class="form-control" style="font-size: 20px;">
                                     <option value="5">5 minutes</option>
                                     <option value="4">4 minutes</option>
@@ -335,7 +336,7 @@
                                 </select>
                             </div>
                             <div class="pure-control-group">
-                                <h2>ROUND THREE:</h2>
+                                <h3>ROUND THREE:</h3>
                                 <select class="form-control" style="font-size: 20px;">
                                     <option value="5" selected="selected">5 minutes</option>
                                     <option value="4">4 minutes</option>
@@ -345,7 +346,7 @@
                                 </select>
                             </div>
                             <div class="pure-control-group">
-                                <h2>ROUND FOUR:</h2>
+                                <h3>ROUND FOUR:</h3>
                                 <select class="form-control" style="font-size: 20px;">
                                     <option value="5">5 minutes</option>
                                     <option value="4">4 minutes</option>
@@ -355,7 +356,7 @@
                                     <option value="0" selected="selected">None</option>
                                 </select>
                             </div><div class="pure-control-group">
-                                <h2>ROUND FIVE:</h2>
+                                <h3>ROUND FIVE:</h3>
                                 <select class="form-control" style="font-size: 20px;">
                                     <option value="5">5 minutes</option>
                                     <option value="4">4 minutes</option>
@@ -364,6 +365,26 @@
                                     <option value="1">1 minute</option>
                                     <option value="0" selected="selected">None</option>
                                 </select>
+                            </div>
+                            <div style="padding: 10px">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <h3 style="margin:auto; padding: 5px;">Bury a card:</h3>
+                                        </td>
+                                        <td>
+                                            <label class="switch" style="margin:auto; padding: 5px;">
+                                                <input id="buryCardCheckbox" type="checkbox">
+                                                <span class="slider round"></span>
+                                            </label>
+                                            <script>
+                                                $("#buryCardCheckbox").change(function() {
+                                                    setBuryCardTo($(this).is(":checked"));
+                                                });
+                                            </script>
+                                        </td>
+                                    </tr>
+                                </table>
                             </div>
                         </form>
                     </div>
@@ -392,45 +413,39 @@
         <div class="row">
             <div class="col-sm-3">
                 <div>
-                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 100%; margin-left: 10px;" />
+                    <img id="playerCardImg" src="/static/cards/president_blue.jpg" style="max-width: 400px; width: 100%; padding: 5px; border-radius: 10px;" />
                 </div>
                 <div>
                     <h1 id="yourCardName">YOUR CARD</h1>
                 </div>
-                <script>
-                    try {
-                        var cardUrl = document.cookie.split('; ').find(row => row.startsWith('myCardUrl')).split('=')[1];
-                        var cardName = document.cookie.split('; ').find(row => row.startsWith('myCardName')).split('=')[1];
-                        $("#playerCardImg").attr("src",cardUrl);
-                        $("#yourCardName").text(cardName);
-                    } catch {
-                        console.log("Something went wrong with your card cookies.")
-                    }
-
-                </script>
             </div>
 
-            <div class="col-sm-6 whiteBorder" style="margin-top: 1%; height: 80vh">           
+            <div class="col-sm-6 whiteBorder" style="margin-top: 1%;">           
                 <h1>PLAYERS</h2>
-                <h3 id="roomCodeDisplay"></h3>
-                <ul id="playersInRoom"></ul>
-                <div class="row card-grid" id="playerMenu" style="overflow:visible; height: 85%; padding: 10px;">
+                <h3>Your Room</h3>
+                <div class="row card-grid" id="playerMenuIn" style="overflow:visible; height: 85%; padding: 10px;">
                     
                     <!-- <div class="col-sm-4 player"><img src="/static/cards/agoraphobe.jpg" class="cardPreviewImg"><a class="unselectable">Agoraphobe</a></a></div> -->
 
-                    <script>
-                        $(".player").each(function() {
-                            width = $(this).css("width");
-                            width = parseInt(width.substring(0,width.length-2));
-                            $(this).css("height",(1.48*width).toString()+"px");
-                        });
-                    </script>
                 </div>
+                <h3>Other Room</h3>
+                <div class="row card-grid" id="playerMenuOut" style="overflow:visible; height: 85%; padding: 10px;">
+                    
+                    <!-- <div class="col-sm-4 player"><img src="/static/cards/agoraphobe.jpg" class="cardPreviewImg"><a class="unselectable">Agoraphobe</a></a></div> -->
+
+                </div>
+                <script>
+                    $(".player").each(function() {
+                        width = $(this).css("width");
+                        width = parseInt(width.substring(0,width.length-2));
+                        $(this).css("height",(1.48*width).toString()+"px");
+                    });
+                </script>
             </div>
 
             <div class="col-sm-3">
                 <div>
-                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 100%; margin-right: 10px;" />
+                    <img id="shareCardImg" src="/static/cards/cardback.jpg" style="max-width: 400px; width: 100%; padding: 5px; border-radius: 10px;" />
                 </div>
                 <div>
                     <h1 id="otherCardName">TARGET'S CARD</h1>

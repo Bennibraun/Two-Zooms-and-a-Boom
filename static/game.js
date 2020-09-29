@@ -142,6 +142,13 @@ gen_cards = [
     meesa.clientID = player.clientID;
   });
 
+  //? Tells a player his card for the start of the game
+  socket.on("your card", function (card) {
+    // console.log(card);
+    meesa.card = card;
+  });
+
+  //? Tells a player his own room code for comms
   socket.on("room code", function (roomCode) {
     meesa.roomCode = roomCode;
   });
@@ -150,8 +157,9 @@ gen_cards = [
   //? -Cards in play
   //? -Players in game
   socket.on("lobby refresh", function (data) {
+    // console.log("lobby refreshed");
     players = data.players;
-    console.log(data.players);
+    // console.log(data.players);
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
     if (
@@ -197,13 +205,13 @@ gen_cards = [
   socket.on("let the game begin", function (players) {
     //* Create localStorage system for player menu
     var playerData = [];
-    console.log(players);
+    // console.log(players);
     players.forEach(function (subPlayers) {
       subPlayers.forEach(function (p) {
         playerData.push({ name: p, cardGuess: "", notes: "" });
       });
     });
-    console.log(playerData);
+    // console.log(playerData);
     saveToStorage("playerData", playerData);
 
     //* Navigate to game room
@@ -212,20 +220,13 @@ gen_cards = [
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
   socket.on("game refresh", function (game) {
-    //* Determine which room to show
-    var room;
-    if (game.players[0].includes(meesa.name)) {
-      room = 0;
-    } else {
-      room = 1;
-    }
-    drawPlayers(game.players[room]);
-    console.log("refreshed");
+    drawPlayers(game.players);
+    // console.log("refreshed");
   });
 
   //? Sets the given cookie
   socket.on("set cookie", function (data) {
-    console.log(data);
+    // console.log(data);
     document.cookie =
       data.name + "=" + data.value + "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
     if (data.name == "name") {
@@ -254,7 +255,7 @@ gen_cards = [
 //? Begin or synchronize the master timer for this player
 //? Guaranteed to be mostly accurate since it goes by the exact time the universal timer was started
 function setTimer(startTime, length) {
-  console.log("setting timer with length " + length);
+  // console.log("setting timer with length " + length);
   var timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
@@ -306,12 +307,10 @@ function joinGame(roomCode, username) {
 
 //? Start a new game as the host
 function hostGame(username) {
-  if (meesa.card == "" && !meesa.host) {
-    socket.emit("host room", {
-      username: username,
-      tempName: getCookie("name"),
-    });
-  }
+  socket.emit("host room", {
+    username: username,
+    tempName: getCookie("name"),
+  });
 }
 
 //? Reveal the host-only game controls
@@ -324,7 +323,7 @@ function showHostTools() {
   $("#cardSetupBottom").css("display", "block");
 
   //* Game controls
-  $("#startBtnForm").css("display", "");
+  $(".startButton").css("display", "");
   $("#roundSettings").css("display", "");
 }
 
@@ -392,8 +391,8 @@ function drawCards(cards, players) {
 
     //* Indicate card balance
     // TODO: add support for card-burying when necessary
-    // console.log(cards);
-    // console.log(players);
+    // // console.log(cards);
+    // // console.log(players);
     var playerCount = players[0].length + players[1].length;
     if (cards.length < playerCount) {
       $("#numCards").text(
@@ -416,7 +415,7 @@ function listPlayers(players) {
   pList = $("#playersInRoom");
   pList.empty();
   players = players[0].concat(players[1]);
-  console.log(players);
+  // console.log(players);
   if (meesa.host) {
     //* Host gets to remove players
     players.forEach(function (p) {
@@ -434,14 +433,15 @@ function listPlayers(players) {
       }
     });
     $(".removePlayer").each(function () {
-      socket.emit("alert", "you have been manually removed");
+      // socket.emit("alert", "you have been manually removed");
       $(this).click(function () {
         var playerToRemove = $(this).next().text();
         socket.emit("leave room", {
           roomCode: meesa.roomCode,
           name: playerToRemove,
+          leaveSocketRoom: false,
         });
-        console.log("removed " + playerToRemove);
+        // // console.log("removed " + playerToRemove);
       });
     });
   } else {
@@ -455,7 +455,6 @@ function listPlayers(players) {
 //? Initiate the game for the current lobby
 function startGame() {
   socket.emit("start game", meesa.roomCode);
-  showGamePage();
 }
 
 //? Refresh the in-game player display
@@ -463,11 +462,38 @@ function drawPlayers(players) {
   // <div class="col-sm-4 player"><img src="/static/cards/agoraphobe.jpg" class="cardPreviewImg"><a class="unselectable">Agoraphobe</a></a></div>
   // players = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",'N','O','P','Q','R','S','T',"U",'V','W','X','Y','Z'];
 
+  //* Draw own card
+  // // console.log(meesa.card);
+  $("#playerCardImg").attr("src", "/static/cards/" + meesa.card.url + ".jpg");
+  $("#yourCardName").text(meesa.card.name);
+
   var playerData = getFromStorage("playerData");
 
-  $("#playerMenu").empty();
+  // // console.log(playerData);
 
-  players.forEach(function (p) {
+  $("#playerMenuIn").empty();
+  $("#playerMenuOut").empty();
+
+  allPlayers = players[0].concat(players[1]);
+  // // console.log(allPlayers);
+
+  var myRoom;
+  if (players[0].includes(meesa.name)) {
+    myRoom = 0;
+  } else {
+    myRoom = 1;
+  }
+
+  allPlayers.forEach(function (p) {
+    //* Determine subroom
+    var subroom;
+    if (players[myRoom].includes(p)) {
+      subroom = "In";
+    } else {
+      subroom = "Out";
+    }
+
+    //* Fill in player-generated details for each card on display
     pID = p.replace(/[^A-Za-z0-9\-_:.]/g, "");
     var cardName = playerData.filter(function (player) {
       return player.name == p;
@@ -485,17 +511,21 @@ function drawPlayers(players) {
         );
       }
     }
+    // // console.log("card: " + cardName);
+    // // console.log("img_match: ");
+    // // console.log(img_match);
     if (img_match[0]) {
       img_url = ' src="/static/cards/' + img_match[0].url + '.jpg"';
     } else {
       img_url = ' src="/static/cards/card_teams/drunk_team.jpg"';
     }
-    $("#playerMenu").append(
+
+    $("#playerMenu" + subroom).append(
       '<div class="col-sm-4 player" id="' +
         pID +
-        '"><div class="row" style="margin: 0px"><div class="col-sm-3" style="display: inline-block; padding: 0px; margin: auto;"><div class="interactBtns" style="float: right;"><button class="colorShareBtn">🌈 🔁</button><button class="cardShareBtn">🃏 🔁</button></div><h3 style="color: white; writing-mode: tb-rl; transform: rotate(-180deg); float:right; margin:0px;">' +
+        '"><div class="row" style="margin: 0px"><div class="col-sm-3" style="display: inline-block; padding: 0px; margin: auto;"><div class="interactBtns" style="float: right;"><button class="colorShareBtn">🌈</button><button class="cardShareBtn">🃏</button></div><h3 style="color: white; padding-bottom: 5px; writing-mode: tb-rl; transform: rotate(-180deg); float:right; margin:0px;">' +
         p +
-        '&nbsp</h3></div><div class="col-sm-9" style="padding: 0px;"><img class="cardGuess"' +
+        '</h3></div><div class="col-sm-9" style="padding: 0px;"><img class="cardGuess"' +
         img_url +
         "/></div></div>" +
         '<div class="markOptions">Mark ' +
@@ -535,10 +565,13 @@ function drawPlayers(players) {
       default:
         cardGuess = "";
     }
-    var nameID = $(this).parent().parent()[0].id;
+    var nameID = $(
+      $($(this).parent().parent().children()[0]).children()[0]
+    ).children("h3")[0].innerText;
+    // console.log(nameID);
     //* Update playerData from localStorage
     var playerData = getFromStorage("playerData");
-    // console.log(playerData);
+    // // console.log(playerData);
     playerData.forEach(function (p) {
       if (p.name == nameID) {
         p.cardGuess = cardGuess;
@@ -556,10 +589,10 @@ function drawPlayers(players) {
   $(".player").click(function (e) {
     e.stopPropagation();
     if ($(this).children(".markOptions").css("visibility") == "hidden") {
-      $("#playerMenu .markOptions").css("visibility", "hidden");
+      $(".markOptions").css("visibility", "hidden");
       $(this).children(".markOptions").css("visibility", "visible");
     } else {
-      $("#playerMenu .markOptions").css("visibility", "hidden");
+      $(".markOptions").css("visibility", "hidden");
     }
   });
 
@@ -571,13 +604,20 @@ function drawPlayers(players) {
   });
   //* Allow close by clicking anywhere else
   $(window).click(function () {
-    $("#playerMenu .markOptions").css("visibility", "hidden");
+    $(".markOptions").css("visibility", "hidden");
+  });
+}
+
+function setBuryCardTo(buryCard) {
+  socket.emit("bury card setting", {
+    buryCard: buryCard,
+    roomCode: meesa.roomCode,
   });
 }
 
 //? Search for cards by name and print the output to the specified html
 function markCardSearch(htmlID, searchStr, players) {
-  console.log(searchStr);
+  // console.log(searchStr);
   if (searchStr == "") {
     $(htmlID).empty();
     return;
@@ -591,31 +631,28 @@ function markCardSearch(htmlID, searchStr, players) {
   for (var i = 0; i < li.length; i++) {
     cardName = a[i].text;
     txtValue = cardName.replace(/[^A-Za-z0-9\-_:]/g, "");
-    // console.log(txtValue);
+    // // console.log(txtValue);
 
-    if (cardName == "Dr. Boom (Red)") {
-      console.log("Dr boom here!!!!");
-    }
     if (cardName.toUpperCase().indexOf(filter) > -1) {
       card = $(li[i]).clone();
       txtValue = txtValue;
       $(card).attr("id", txtValue);
-      // console.log($(card).id);
-      // console.log($(card).get(0).outerHTML);
-      // console.log($(htmlID).children("#" + txtValue).length == 0);
+      // // console.log($(card).id);
+      // // console.log($(card).get(0).outerHTML);
+      // // console.log($(htmlID).children("#" + txtValue).length == 0);
       if ($(htmlID).children("#" + txtValue).length == 0) {
-        // console.log("appending " + txtValue);
+        // // console.log("appending " + txtValue);
         $(htmlID).append(card);
       } else {
-        // console.log(txtValue + " already in list");
-        // console.log(card.get(0).outerHTML);
+        // // console.log(txtValue + " already in list");
+        // // console.log(card.get(0).outerHTML);
       }
     } else {
-      // console.log($(htmlID).children("#" + txtValue));
+      // // console.log($(htmlID).children("#" + txtValue));
       $(htmlID)
         .children("#" + txtValue)
         .remove();
-      console.log("removed " + txtValue);
+      // // console.log("removed " + txtValue);
     }
   }
 
@@ -623,10 +660,13 @@ function markCardSearch(htmlID, searchStr, players) {
   $(htmlID)
     .children()
     .click(function () {
-      console.log($(this));
+      // // console.log($(this));
       //* Determine player and card
       var cardName = $(this).children("a")[0].innerText;
-      var playerName = $(this).parent().attr("id").replace("cardSearchFor", "");
+      var playerName = $(
+        $($(this).parent().parent().parent().children()[0]).children()[0]
+      ).children()[1].innerText;
+      // // console.log(playerName);
       //* Update playerData from localStorage
       var playerData = getFromStorage("playerData");
       playerData.forEach(function (p) {
@@ -641,7 +681,11 @@ function markCardSearch(htmlID, searchStr, players) {
 
 //? Make this player leave the current room entirely and return to the landing page
 function leaveLobby() {
-  socket.emit("leave room", { roomCode: meesa.roomCode, name: meesa.name });
+  socket.emit("leave room", {
+    roomCode: meesa.roomCode,
+    name: meesa.name,
+    leaveSocketRoom: true,
+  });
 
   showLandingPage();
 
@@ -685,7 +729,7 @@ function deleteCookie(name) {
 //   pList = $("#playersInRoom");
 //   pList.empty();
 //   if (isHost) {
-//     // console.log('host');
+//     // // console.log('host');
 //     $.each(players, function (p) {
 //       if (players[p] == userName) {
 //         $("<li/>").text(players[p]).appendTo(pList);
@@ -704,7 +748,7 @@ function deleteCookie(name) {
 //       $(this).click(function () {
 //         var playerToRemove = $(this).next().text();
 //         socket.emit("removePlayer", playerToRemove);
-//         // console.log("removed " + playerToRemove);
+//         // // console.log("removed " + playerToRemove);
 //       });
 //     });
 //   } else {
@@ -714,34 +758,34 @@ function deleteCookie(name) {
 //   }
 
 //   if (!players.includes(userName)) {
-//     // console.log("this session has been removed.");
+//     // // console.log("this session has been removed.");
 //     leaveLobby();
 //   }
 // });
 
 // socket.on("cards", function (cards) {
 //   cardsInPlay = cards;
-//   // console.log(cards);
+//   // // console.log(cards);
 //   drawCards();
 // });
 
 // socket.on("askForCard", function (c) {
-//   // console.log('asking for card');
+//   // // console.log('asking for card');
 //   socket.emit("assignMyCard", userName);
 // });
 
 // socket.on("heresYourCard", function (card) {
-//   // console.log('your card was sent as ');
-//   // console.log(card);
-//   // console.log('and the cookie is being set.');
+//   // // console.log('your card was sent as ');
+//   // // console.log(card);
+//   // // console.log('and the cookie is being set.');
 //   document.cookie = "myCardUrl=" + card.url;
 //   document.cookie = "myCardName=" + card.name;
 //   $("#playerCardImg").attr("src", card.url);
-//   // console.log("The src of your card was set to " + card.url);
+//   // // console.log("The src of your card was set to " + card.url);
 // });
 
 // socket.on("start timer", function (params) {
-//   // console.log(params);
+//   // // console.log(params);
 //   startTimer(params.timerLength, params.startTime);
 // });
 
@@ -786,12 +830,12 @@ function deleteCookie(name) {
 // });
 
 // socket.on("yourName", function (name) {
-//   // console.log(name);
+//   // // console.log(name);
 //   userName = name;
 // });
 
 // socket.on("room code", function (roomCode) {
-//   console.log("received message: " + roomCode);
+//   // console.log("received message: " + roomCode);
 //   $(document).ready(function () {
 //     $("#roomCodeDisplay").text("Room Code: " + roomCode);
 //     // Show link to join
@@ -824,12 +868,12 @@ function deleteCookie(name) {
 
 // function selectCard(src, cardName) {
 //   if (!isHost) {
-//     // console.log("You shouldn't be able to do this!");
+//     // // console.log("You shouldn't be able to do this!");
 //     return;
 //   }
 
 //   if (cardsInPlay["cards"][cardName]) {
-//     // console.log("Card is already in play.");
+//     // // console.log("Card is already in play.");
 //     return;
 //   }
 
@@ -847,7 +891,7 @@ function deleteCookie(name) {
 // }
 
 // function deselectCard(src) {
-//   console.log($(".card"));
+//   // console.log($(".card"));
 //   var card = $(".card").filter(function () {
 //     return $(this).children("img")[0].getAttribute("src") == src;
 //   });
@@ -863,7 +907,7 @@ function deleteCookie(name) {
 
 // // When leave btn pressed, tell server to leave lobby
 // function leaveLobby() {
-//   console.log("leaving lobby");
+//   // console.log("leaving lobby");
 //   delete_cookie("name");
 //   delete_cookie("roomCode");
 //   delete_cookie("myCardName");
