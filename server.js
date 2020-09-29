@@ -155,8 +155,8 @@ function createRoom(roomCode) {
     cards: [],
     buryCard: false,
     gameActive: false,
-    subroomA: { players: [], leader: "" },
-    subroomB: { players: [], leader: "" },
+    subroomA: { players: [], leader: "", usurps: [] },
+    subroomB: { players: [], leader: "", usurps: [] },
     timerStart: "",
     timerLengths: [],
     currentTimer: 0,
@@ -254,6 +254,7 @@ function lobbyRefresh(roomCode) {
 function gameRefresh(roomCode) {
   timerRefresh(roomCode);
   io.to(roomCode).emit("game refresh", { players: getPlayerNames(roomCode) });
+  leaderRefresh(roomCode);
 }
 
 function timerRefresh(roomCode) {
@@ -261,6 +262,14 @@ function timerRefresh(roomCode) {
   io.to(roomCode).emit("timer refresh", {
     start: room.timerStart,
     length: room.timerLengths[room.currentTimer],
+  });
+}
+
+function leaderRefresh(roomCode) {
+  var room = getRoom(roomCode);
+  io.to(roomCode).emit("setting leaders", {
+    subroomA: room.subroomA.leader,
+    subroomB: room.subroomB.leader,
   });
 }
 
@@ -593,9 +602,67 @@ io.on("connection", function (socket) {
       room.subroomB.leader = data.name;
     }
 
-    io.to(data.roomCode).emit("setting leaders", {
-      subroomA: room.subroomA.leader,
-      subroomB: room.subroomB.leader,
+    leaderRefresh(data.roomCode);
+  });
+
+  socket.on("attempt usurp", function (data) {
+    var room = getRoom(data.roomCode);
+    var subroom;
+    if (
+      room.subroomA.players.find(function (p) {
+        return p.name == data.name;
+      })
+    ) {
+      subroom = room.subroomA;
+    } else {
+      subroom = room.subroomB;
+    }
+
+    //* If usurp object exists, make votes 0. Otherwise create it
+    subroom.usurps.forEach(function (u) {
+      if (u.name == data.name) {
+        u.votes = 0;
+      }
     });
+    if (
+      !subroom.usurps.find(function (u) {
+        return u.name == data.name;
+      })
+    ) {
+      subroom.usurps.push({ name: data.name, votes: 0 });
+    }
+
+    io.to(data.roomCode).emit("vote on usurp", data.name);
+  });
+
+  socket.on("vote submission", function (data) {
+    var room = getRoom(data.roomCode);
+    var subroom;
+    if (
+      room.subroomA.players.find(function (p) {
+        return p.name == data.name;
+      })
+    ) {
+      subroom = room.subroomA;
+    } else {
+      subroom = room.subroomB;
+    }
+
+    var usurp = subroom.usurps.find(function (u) {
+      return u.name == data.name;
+    });
+
+    usurp.votes += 1;
+
+    //* Check if vote threshold has been reached
+    if (usurp.votes >= subroom.players.length / 2) {
+      subroom.leader = data.name;
+      io.to(data.roomCode).emit("setting leaders", {
+        subroomA: room.subroomA.leader,
+        subroomB: room.subroomB.leader,
+      });
+      //* Clear all current usurp attempts since one succeeded
+      subroom.usurps = [];
+    }
   });
 });

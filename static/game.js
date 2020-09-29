@@ -14,6 +14,7 @@ var meesa = {
 };
 
 var players;
+var currentRound;
 
 myStorage = window.localStorage;
 
@@ -300,12 +301,58 @@ gen_cards = [
       otherRoom.text("Other Room Leader: None");
     }
 
+    if (data.subroomA == meesa.name || data.subroomB == meesa.name) {
+      console.log("im leader!");
+      meesa.leader = true;
+    }
+
     drawLeaderControls();
+  });
+
+  //? Request a vote for a particular usurp attempt
+  socket.on("vote on usurp", function (name) {
+    var dl = $("#dialog");
+    dl.empty();
+    dl.append(
+      '<p style="color:black">' +
+        name +
+        ' would like to be the new leader of your room. Cast your vote!</p><br><button id="yesVoteBtn">Yes</button><button id="noVoteBtn">No</button>'
+    );
+    //* Set button functionality
+    $("#yesVoteBtn").click(function () {
+      socket.emit("vote submission", { roomCode: meesa.roomCode, name: name });
+      dl.dialog("close");
+      dl.empty();
+    });
+    $("#noVoteBtn").click(function () {
+      dl.dialog("close");
+      dl.empty();
+    });
+
+    dl.dialog("option", "title", "Vote for a Leader");
+    dl.dialog("open");
   });
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
   socket.on("game refresh", function (game) {
     players = game.players;
+    if (!$("#dialog").length) {
+      //* Create JQuery dialog system
+      $("#gamePage").append('<div id="dialog"></div>');
+      $("#dialog").dialog({
+        autoOpen: false,
+        modal: true,
+        resizable: false,
+        draggable: true,
+        closeOnEscape: true,
+        title: "Appoint a leader",
+        open: function () {
+          jQuery(".ui-widget-overlay").bind("click", function () {
+            jQuery("#dialog").dialog("close");
+          });
+        },
+      });
+    }
     drawPlayers(game.players);
     drawLeaderControls();
   });
@@ -461,7 +508,7 @@ function setTimer(startTime, length) {
     }
     var clockText =
       parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
-    $("#timer").text(clockText);
+    $("#timer").text("⏱️ " + clockText);
   });
 }
 
@@ -881,6 +928,8 @@ function markCardSearch(htmlID, searchStr, players) {
 
 //? Refreshes the leader controls
 function drawLeaderControls() {
+  console.log("drawing leader controls");
+  //* At start, just show initial appointment button
   if ($("#myRoomLeader")[0].innerText == "My Room Leader: None") {
     console.log("leader for my room not yet set.");
     return;
@@ -888,6 +937,62 @@ function drawLeaderControls() {
 
   var ctrls = $("#leaderControls");
   ctrls.empty();
+
+  //* When I am the leader
+  if (meesa.leader) {
+    ctrls.append('<button id="setHostagesBtn">Set Hostages</button>');
+    $("#setHostagesBtn").click(function () {
+      var dl = $("#dialog");
+      dl.empty();
+      var numHostages = getNumHostages();
+      dl.dialog("option", "title", "Select " + numHostages + " Hostages");
+      dl.append(
+        '<ul style="color:black;list-style:none; width:100%;" id="hostageList"></ul>'
+      );
+      if (players[0].includes(meesa.name)) {
+        playersInRoom = players[0];
+      } else {
+        playersInRoom = players[1];
+      }
+      playersInRoom.forEach(function (p) {
+        $("#hostageList").append(
+          '<li style="text-align:center; width:100%;"><button class="selectHostageBtn" style="width:100%">' +
+            p +
+            "</button></li>"
+        );
+      });
+      dl.append('<button id="submitHostageSelection">Submit</button>');
+      dl.dialog("open");
+      var hostageSelection = [];
+      $(".selectHostageBtn").click(function () {
+        var name = $(this).text();
+        if (hostageSelection.includes(name)) {
+          hostageSelection = hostageSelection.filter(function (hostage) {
+            return hostage != name;
+          });
+          $(this).css("background-color", "white");
+          console.log("deselected " + name);
+        } else {
+          hostageSelection.push(name);
+          $(this).css("background-color", "lightblue");
+          console.log("selected" + name);
+        }
+      });
+      $("#submitHostageSelection").click(function () {
+        if (hostageSelection.length != numHostages) {
+          alert("You need to select exactly " + numHostages + " hostages.");
+          return;
+        }
+        dl.dialog("close");
+        socket.emit("hostage selection", {
+          roomCode: meesa.roomCode,
+          hostages: hostageSelection,
+        });
+      });
+    });
+    return;
+  }
+
   ctrls.append('<button id="usurpBtn">Usurp Leadership</button>');
   $("#usurpBtn").click(function () {
     socket.emit("attempt usurp", {
@@ -895,6 +1000,62 @@ function drawLeaderControls() {
       name: meesa.name,
     });
   });
+}
+
+//? Returns the number of hostages needed in this round
+function getNumHostages() {
+  //TODO: Implement round-tracking
+  var currentRound = 1;
+  var numPlayers = players[0].length + players[1].length;
+  if (numPlayers <= 10) {
+    return 1;
+  } else if (numPlayers <= 13) {
+    switch (currentRound) {
+      case 1:
+      case 2:
+        return 2;
+      case 3:
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else if (numPlayers <= 17) {
+    switch (currentRound) {
+      case 1:
+        return 3;
+      case 2:
+      case 3:
+        return 2;
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else if (numPlayers <= 21) {
+    switch (currentRound) {
+      case 1:
+        return 4;
+      case 2:
+        return 3;
+      case 3:
+        return 2;
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else {
+    switch (currentRound) {
+      case 1:
+        return 5;
+      case 2:
+        return 4;
+      case 3:
+        return 3;
+      case 4:
+        return 2;
+      case 5:
+        return 1;
+    }
+  }
 }
 
 //? Make this player leave the current room entirely and return to the landing page
