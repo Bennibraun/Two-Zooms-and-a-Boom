@@ -136,7 +136,6 @@ gen_cards = [
 {
   //? Tells a player personal info about themself
   socket.on("your identity", function (player) {
-    // console.log(player);
     meesa.name = player.name;
     meesa.card = player.card;
     meesa.clientID = player.clientID;
@@ -144,7 +143,6 @@ gen_cards = [
 
   //? Tells a player his card for the start of the game
   socket.on("your card", function (card) {
-    // console.log(card);
     meesa.card = card;
   });
 
@@ -162,9 +160,7 @@ gen_cards = [
   //? -Cards in play
   //? -Players in game
   socket.on("lobby refresh", function (data) {
-    // console.log("lobby refreshed");
     players = data.players;
-    // console.log(data.players);
     drawCards(data.cardsSelected, data.players);
     listPlayers(data.players);
     if (
@@ -210,23 +206,108 @@ gen_cards = [
   socket.on("let the game begin", function (players) {
     //* Create localStorage system for player menu
     var playerData = [];
-    // console.log(players);
     players.forEach(function (subPlayers) {
       subPlayers.forEach(function (p) {
         playerData.push({ name: p, cardGuess: "", notes: "" });
       });
     });
-    // console.log(playerData);
     saveToStorage("playerData", playerData);
 
     //* Navigate to game room
     showGamePage();
+
+    //* Create JQuery dialog system
+    $("#gamePage").append('<div id="dialog"></div>');
+    $("#dialog").dialog({
+      autoOpen: false,
+      modal: true,
+      resizable: false,
+      draggable: true,
+      closeOnEscape: true,
+      title: "Appoint a leader",
+      open: function () {
+        jQuery(".ui-widget-overlay").bind("click", function () {
+          jQuery("#dialog").dialog("close");
+        });
+      },
+    });
+
+    //* Show initial leader controls
+    $("#leaderControls").empty();
+    $("#leaderControls").append(
+      '<button id="appointLeader">Appoint a leader</button>'
+    );
+
+    $("#dialog").empty();
+    $("#dialog").append(
+      '<ul style="color:black;list-style:none; width:100%;" id="leaderAppointmentListing"></ul>'
+    );
+    if (players[0].includes(meesa.name)) {
+      playersInRoom = players[0];
+    } else {
+      playersInRoom = players[1];
+    }
+    playersInRoom.forEach(function (p) {
+      $("#leaderAppointmentListing").append(
+        '<li style="text-align:center; width:100%;"><button class="selectLeaderBtn" style="width:100%">' +
+          p +
+          "</button></li>"
+      );
+    });
+
+    $("#appointLeader").click(function () {
+      $("#dialog").dialog("open");
+    });
+
+    $(".selectLeaderBtn").click(function () {
+      var selectionName = $(this)[0].innerText;
+      socket.emit("initial leader selection", {
+        roomCode: meesa.roomCode,
+        name: selectionName,
+      });
+      $("#dialog").dialog("close");
+    });
+  });
+
+  //? Refreshes the room leaders
+  socket.on("setting leaders", function (data) {
+    var myRoom = $("#myRoomLeader");
+    var otherRoom = $("#otherRoomLeader");
+
+    if (players[0].includes(meesa.name)) {
+      if (players[0].includes(data.subroomA)) {
+        myRoom.text("My Room Leader: " + data.subroomA);
+        otherRoom.text("Other Room Leader: " + data.subroomB);
+      } else {
+        myRoom.text("My Room Leader: " + data.subroomB);
+        otherRoom.text("Other Room Leader: " + data.subroomA);
+      }
+    } else {
+      if (players[1].includes(data.subroomA)) {
+        myRoom.text("My Room Leader: " + data.subroomA);
+        otherRoom.text("Other Room Leader: " + data.subroomB);
+      } else {
+        myRoom.text("My Room Leader: " + data.subroomB);
+        otherRoom.text("Other Room Leader: " + data.subroomA);
+      }
+    }
+
+    //* If one of them hasn't been set, must preserve "unset" status
+    if (myRoom.text() == "My Room Leader: ") {
+      myRoom.text("My Room Leader: None");
+    }
+    if (otherRoom.text() == "Other Room Leader: ") {
+      otherRoom.text("Other Room Leader: None");
+    }
+
+    drawLeaderControls();
   });
 
   //? Refreshes all info necessary to run the overall game, excluding individual actions
   socket.on("game refresh", function (game) {
     players = game.players;
     drawPlayers(game.players);
+    drawLeaderControls();
   });
 
   //? Someone wants to color share
@@ -339,30 +420,12 @@ gen_cards = [
       });
       changeGuess(data.target, meesa.card.name);
     } else {
-      var cardGuess;
-      switch (data.color) {
-        case "blue":
-          cardGuess = "gen_blue";
-          break;
-        case "red":
-          cardGuess = "gen_red";
-          break;
-        case "grey":
-          cardGuess = "gen_grey";
-          break;
-        case "green":
-          cardGuess = "gen_green";
-          break;
-        default:
-          cardGuess = "";
-      }
-      changeGuess(data.target, cardGuess);
+      changeGuess(data.target, data.cardName);
     }
   });
 
   //? Sets the given cookie
   socket.on("set cookie", function (data) {
-    // console.log(data);
     document.cookie =
       data.name + "=" + data.value + "; expires=Fri, 31 Dec 9999 23:59:59 GMT";
     if (data.name == "name") {
@@ -391,7 +454,6 @@ gen_cards = [
 //? Begin or synchronize the master timer for this player
 //? Guaranteed to be mostly accurate since it goes by the exact time the universal timer was started
 function setTimer(startTime, length) {
-  // console.log("setting timer with length " + length);
   var timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
@@ -526,9 +588,6 @@ function drawCards(cards, players) {
     }
 
     //* Indicate card balance
-    // TODO: add support for card-burying when necessary
-    // // console.log(cards);
-    // // console.log(players);
     var playerCount = players[0].length + players[1].length;
     if (cards.length < playerCount) {
       $("#numCards").text(
@@ -551,7 +610,6 @@ function listPlayers(players) {
   pList = $("#playersInRoom");
   pList.empty();
   players = players[0].concat(players[1]);
-  // console.log(players);
   if (meesa.host) {
     //* Host gets to remove players
     players.forEach(function (p) {
@@ -577,7 +635,6 @@ function listPlayers(players) {
           name: playerToRemove,
           leaveSocketRoom: false,
         });
-        // // console.log("removed " + playerToRemove);
       });
     });
   } else {
@@ -599,14 +656,10 @@ function drawPlayers(players) {
   // players = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",'N','O','P','Q','R','S','T',"U",'V','W','X','Y','Z'];
 
   //* Draw own card
-  // // console.log(meesa.card);
   $("#playerCardImg").attr("src", "/static/cards/" + meesa.card.url + ".jpg");
   $("#yourCardName").text(meesa.card.name);
 
   var playerData = getFromStorage("playerData");
-  // console.log(playerData);
-
-  // // console.log(playerData);
 
   $("#playerMenuIn").empty();
   $("#playerMenuOut").empty();
@@ -615,7 +668,6 @@ function drawPlayers(players) {
   allPlayers = allPlayers.filter(function (p) {
     return p != meesa.name;
   });
-  // // console.log(allPlayers);
 
   var myRoom;
   if (players[0].includes(meesa.name)) {
@@ -651,36 +703,40 @@ function drawPlayers(players) {
         );
       }
     }
-    // // console.log("card: " + cardName);
-    // // console.log("img_match: ");
-    // // console.log(img_match);
     if (img_match[0]) {
       img_url = ' src="/static/cards/' + img_match[0].url + '.jpg"';
     } else {
       img_url = ' src="/static/cards/card_teams/drunk_team.jpg"';
     }
 
-    $("#playerMenu" + subroom).append(
+    playerHTML =
       '<div class="col-sm-4 player" id="' +
-        pID +
-        '"><div class="row" style="margin: 0px"><div class="col-sm-3" style="display: inline-block; padding: 0px; margin: auto;"><div class="interactBtns" style="float: right;"><button class="colorShareBtn">🌈</button><button class="cardShareBtn">🃏</button></div><h3 style="color: white; padding-bottom: 5px; writing-mode: tb-rl; transform: rotate(-180deg); float:right; margin:0px;">' +
-        p +
-        '</h3></div><div class="col-sm-9" style="padding: 0px;"><img class="cardGuess"' +
-        img_url +
-        "/></div></div>" +
-        '<div class="markOptions">Mark ' +
-        p +
-        " as:<br>" +
-        '<img id="markBlue" class="markBtn" src="/static/cards/card_teams/blue_icon.jpg"/>' +
-        '<img id="markRed" class="markBtn" src="/static/cards/card_teams/red_icon.jpg"/>' +
-        '<img id="markGrey" class="markBtn" src="/static/cards/card_teams/grey_icon.jpg"/>' +
-        '<img id="markGreen" class="markBtn" src="/static/cards/card_teams/green_icon.jpg"/>' +
-        '<img id="markUnknown" class="markBtn" src="/static/cards/card_teams/unknown_icon.jpg"/>' +
-        '<br><input type="text" class="markCardInput" placeholder="Search for a card..."><ul id="cardSearchFor' +
-        pID +
-        '" class="markCardSearch" style="height:60%;width:95%;overflow:auto;"></ul>' +
-        "</div></div>"
-    );
+      pID +
+      '"><div class="row" style="margin: 0px"><div class="col-sm-3" style="display: inline-block; padding: 0px; margin: auto;">';
+    if (subroom == "In") {
+      playerHTML +=
+        '<div class="interactBtns" style="float: right;"><button class="colorShareBtn">🌈</button><button class="cardShareBtn">🃏</button></div>';
+    }
+    playerHTML +=
+      '<h3 style="color: white; padding-bottom: 5px; writing-mode: tb-rl; transform: rotate(-180deg); float:right; margin:0px;">' +
+      p +
+      '</h3></div><div class="col-sm-9" style="padding: 0px;"><img class="cardGuess"' +
+      img_url +
+      "/></div></div>" +
+      '<div class="markOptions">Mark ' +
+      p +
+      " as:<br>" +
+      '<img id="markBlue" class="markBtn" src="/static/cards/card_teams/blue_icon.jpg"/>' +
+      '<img id="markRed" class="markBtn" src="/static/cards/card_teams/red_icon.jpg"/>' +
+      '<img id="markGrey" class="markBtn" src="/static/cards/card_teams/grey_icon.jpg"/>' +
+      '<img id="markGreen" class="markBtn" src="/static/cards/card_teams/green_icon.jpg"/>' +
+      '<img id="markUnknown" class="markBtn" src="/static/cards/card_teams/unknown_icon.jpg"/>' +
+      '<br><input type="text" class="markCardInput" placeholder="Search for a card..."><ul id="cardSearchFor' +
+      pID +
+      '" class="markCardSearch" style="height:60%;width:95%;overflow:auto;"></ul>' +
+      "</div></div>";
+
+    $("#playerMenu" + subroom).append(playerHTML);
   });
 
   $(".markBtn").click(function (e) {
@@ -708,10 +764,8 @@ function drawPlayers(players) {
     var nameID = $(
       $($(this).parent().parent().children()[0]).children()[0]
     ).children("h3")[0].innerText;
-    // console.log(nameID);
     //* Update playerData from localStorage
     var playerData = getFromStorage("playerData");
-    // // console.log(playerData);
     playerData.forEach(function (p) {
       if (p.name == nameID) {
         p.cardGuess = cardGuess;
@@ -722,7 +776,6 @@ function drawPlayers(players) {
   });
 
   $(".markCardInput").keyup(function (e) {
-    // $(this).parent().parent().children()[0].innerText
     markCardSearch("#" + $(this).next()[0].id, $(this).val(), players);
   });
 
@@ -775,7 +828,6 @@ function setBuryCardTo(buryCard) {
 
 //? Search for cards by name and print the output to the specified html
 function markCardSearch(htmlID, searchStr, players) {
-  // console.log(searchStr);
   if (searchStr == "") {
     $(htmlID).empty();
     return;
@@ -785,32 +837,22 @@ function markCardSearch(htmlID, searchStr, players) {
   var li = $("#cardsList li");
   var a = li.children("a");
 
-  // Loop through all list items, and hide those who don't match the search query
+  //* Loop through all list items, and hide those who don't match the search query
   for (var i = 0; i < li.length; i++) {
     cardName = a[i].text;
     txtValue = cardName.replace(/[^A-Za-z0-9\-_:]/g, "");
-    // // console.log(txtValue);
 
     if (cardName.toUpperCase().indexOf(filter) > -1) {
       card = $(li[i]).clone();
       txtValue = txtValue;
       $(card).attr("id", txtValue);
-      // // console.log($(card).id);
-      // // console.log($(card).get(0).outerHTML);
-      // // console.log($(htmlID).children("#" + txtValue).length == 0);
       if ($(htmlID).children("#" + txtValue).length == 0) {
-        // // console.log("appending " + txtValue);
         $(htmlID).append(card);
-      } else {
-        // // console.log(txtValue + " already in list");
-        // // console.log(card.get(0).outerHTML);
       }
     } else {
-      // // console.log($(htmlID).children("#" + txtValue));
       $(htmlID)
         .children("#" + txtValue)
         .remove();
-      // // console.log("removed " + txtValue);
     }
   }
 
@@ -818,13 +860,13 @@ function markCardSearch(htmlID, searchStr, players) {
   $(htmlID)
     .children()
     .click(function () {
-      // // console.log($(this));
       //* Determine player and card
       var cardName = $(this).children("a")[0].innerText;
       var playerName = $(
-        $($(this).parent().parent().parent().children()[0]).children()[0]
-      ).children()[1].innerText;
-      // // console.log(playerName);
+        $(
+          $($(this).parent().parent().parent().children()[0]).children()[0]
+        ).children()[0]
+      )[0].innerText;
       //* Update playerData from localStorage
       var playerData = getFromStorage("playerData");
       playerData.forEach(function (p) {
@@ -835,6 +877,24 @@ function markCardSearch(htmlID, searchStr, players) {
       saveToStorage("playerData", playerData);
       drawPlayers(players);
     });
+}
+
+//? Refreshes the leader controls
+function drawLeaderControls() {
+  if ($("#myRoomLeader")[0].innerText == "My Room Leader: None") {
+    console.log("leader for my room not yet set.");
+    return;
+  }
+
+  var ctrls = $("#leaderControls");
+  ctrls.empty();
+  ctrls.append('<button id="usurpBtn">Usurp Leadership</button>');
+  $("#usurpBtn").click(function () {
+    socket.emit("attempt usurp", {
+      roomCode: meesa.roomCode,
+      name: meesa.name,
+    });
+  });
 }
 
 //? Make this player leave the current room entirely and return to the landing page
@@ -886,208 +946,3 @@ function getCookie(name) {
 function deleteCookie(name) {
   document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 }
-
-// socket.on("isPlayer", function (isPlayer) {
-//   isHost = false;
-//   $("#cardSetupBottom").remove();
-//   $("#cardPreviewRow").css("height", "90%");
-// });
-
-// socket.on("players", function (playerList) {
-//   players = playerList;
-//   // List all players in the room on the html list
-//   pList = $("#playersInRoom");
-//   pList.empty();
-//   if (isHost) {
-//     // // console.log('host');
-//     $.each(players, function (p) {
-//       if (players[p] == userName) {
-//         $("<li/>").text(players[p]).appendTo(pList);
-//       } else {
-//         $("<li/>")
-//           .html(
-//             players[p] +
-//               '&nbsp;&nbsp;&nbsp;&nbsp;<span class="removePlayer">x</span><a class="playerName" style="display:none;">' +
-//               players[p] +
-//               "</a>"
-//           )
-//           .appendTo(pList);
-//       }
-//     });
-//     $(".removePlayer").each(function () {
-//       $(this).click(function () {
-//         var playerToRemove = $(this).next().text();
-//         socket.emit("removePlayer", playerToRemove);
-//         // // console.log("removed " + playerToRemove);
-//       });
-//     });
-//   } else {
-//     $.each(players, function (p) {
-//       $("<li/>").text(players[p]).appendTo(pList);
-//     });
-//   }
-
-//   if (!players.includes(userName)) {
-//     // // console.log("this session has been removed.");
-//     leaveLobby();
-//   }
-// });
-
-// socket.on("cards", function (cards) {
-//   cardsInPlay = cards;
-//   // // console.log(cards);
-//   drawCards();
-// });
-
-// socket.on("askForCard", function (c) {
-//   // // console.log('asking for card');
-//   socket.emit("assignMyCard", userName);
-// });
-
-// socket.on("heresYourCard", function (card) {
-//   // // console.log('your card was sent as ');
-//   // // console.log(card);
-//   // // console.log('and the cookie is being set.');
-//   document.cookie = "myCardUrl=" + card.url;
-//   document.cookie = "myCardName=" + card.name;
-//   $("#playerCardImg").attr("src", card.url);
-//   // // console.log("The src of your card was set to " + card.url);
-// });
-
-// socket.on("start timer", function (params) {
-//   // // console.log(params);
-//   startTimer(params.timerLength, params.startTime);
-// });
-
-// function startTimer(length, startTime) {
-//   if (timerRunning) {
-//     return;
-//   } else {
-//     timerRunning = true;
-//   }
-
-//   socket.emit("client synced", "");
-
-//   var timer = setInterval(function () {
-//     var time = Math.ceil(length - (Date.now() / 1000 - startTime)); // milliseconds elapsed since start
-//     if (time <= 0) {
-//       clearInterval(timer);
-//     }
-//     var clockText = "";
-//     clockText += parseInt(time / 60);
-//     clockText += ":";
-//     var min = time % 60;
-//     if (min < 10) {
-//       clockText += "0";
-//     }
-//     clockText += parseInt(min);
-
-//     $("#timer").text(clockText);
-//   }, 1000); // update about every second
-// }
-
-// socket.on("stop timer", function () {
-//   timerRunning = false;
-//   clearInterval(timer);
-// });
-
-// socket.on("startingGame", function (playerList) {
-//   playerNames = playerList;
-//   $.ajax({
-//     type: "GET",
-//     url: "/play/",
-//   });
-// });
-
-// socket.on("yourName", function (name) {
-//   // // console.log(name);
-//   userName = name;
-// });
-
-// socket.on("room code", function (roomCode) {
-//   // console.log("received message: " + roomCode);
-//   $(document).ready(function () {
-//     $("#roomCodeDisplay").text("Room Code: " + roomCode);
-//     // Show link to join
-//     $("#joinLink").text("http://twozoomsandaboom.com/joinCode/" + roomCode);
-//   });
-//   socket.emit("join room", roomCode);
-// });
-
-// socket.on("delete_cookie", function (cookie) {
-//   document.cookie = cookie + "=;expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-// });
-
-// socket.on("alert message", function (msg) {
-//   alert(msg);
-// });
-
-// function startGame() {
-//   socket.emit("start game", "");
-// }
-
-// socket.on("go for start", function (a) {
-//   // Tell all clients in room that the game's starting
-//   socket.to(my.roomCode).emit("startingGame", "");
-
-//   $.ajax({
-//     type: "GET",
-//     url: "/play/",
-//   });
-// });
-
-// function selectCard(src, cardName) {
-//   if (!isHost) {
-//     // // console.log("You shouldn't be able to do this!");
-//     return;
-//   }
-
-//   if (cardsInPlay["cards"][cardName]) {
-//     // // console.log("Card is already in play.");
-//     return;
-//   }
-
-//   // Add card to setup
-//   cardsInPlay["cards"][cardName] = { url: src };
-//   drawCards();
-
-//   var li = $("#cardsList li").filter(function () {
-//     return $(this).children("a")[0].text == cardName;
-//   });
-
-//   li.css("background-color", "#1c1c1c");
-
-//   socket.emit("update cards", cardsInPlay);
-// }
-
-// function deselectCard(src) {
-//   // console.log($(".card"));
-//   var card = $(".card").filter(function () {
-//     return $(this).children("img")[0].getAttribute("src") == src;
-//   });
-//   cardName = $(card[0]).children("a")[0].text;
-//   delete cardsInPlay["cards"][cardName];
-//   card[0].remove();
-//   socket.emit("update cards", cardsInPlay);
-//   var li = $("#cardsList li").filter(function () {
-//     return $(this).children("a")[0].text == cardName;
-//   });
-//   li.css("background-color", "#3b3b3b");
-// }
-
-// // When leave btn pressed, tell server to leave lobby
-// function leaveLobby() {
-//   // console.log("leaving lobby");
-//   delete_cookie("name");
-//   delete_cookie("roomCode");
-//   delete_cookie("myCardName");
-//   delete_cookie("myCardUrl");
-//   socket.emit("leaveRoom", "");
-//   location.href = "/";
-// }
-
-// function delete_cookie(name) {
-//   if (get_cookie(name)) {
-//     document.cookie = name + "=" + ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
-//   }
-// }
