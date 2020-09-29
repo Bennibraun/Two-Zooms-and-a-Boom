@@ -15,6 +15,7 @@ var meesa = {
 
 var players;
 var currentRound;
+var timer;
 
 myStorage = window.localStorage;
 
@@ -201,6 +202,7 @@ gen_cards = [
   //? Refreshes the current timer to ensure synchronicity
   socket.on("timer refresh", function (timer) {
     setTimer(timer.start, timer.length);
+    currentRound = timer.currentRound;
   });
 
   //? Officially starts the game
@@ -501,15 +503,22 @@ gen_cards = [
 //? Begin or synchronize the master timer for this player
 //? Guaranteed to be mostly accurate since it goes by the exact time the universal timer was started
 function setTimer(startTime, length) {
-  var timer = setInterval(function () {
+  clearInterval(timer);
+  timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
+      if (meesa.name == players[0][0]) {
+        socket.emit("timer done", { roomCode: roomCode });
+      }
       clearInterval(timer);
+      $("#timer").text("⏰ Round Over");
     }
     var clockText =
       parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
-    $("#timer").text("⏱️ " + clockText);
-  });
+    $("#timer").text(
+      "⏱️ " + clockText + "&nbsp&nbsp&nbsp Round: " + currentRound
+    );
+  }, 200);
 }
 
 //? Load the current player to the landing page
@@ -674,7 +683,6 @@ function listPlayers(players) {
       }
     });
     $(".removePlayer").each(function () {
-      // socket.emit("alert", "you have been manually removed");
       $(this).click(function () {
         var playerToRemove = $(this).next().text();
         socket.emit("leave room", {
@@ -694,7 +702,15 @@ function listPlayers(players) {
 
 //? Initiate the game for the current lobby
 function startGame() {
-  socket.emit("start game", meesa.roomCode);
+  var timerLengths = [];
+  $("#timerSettings .form-control").each(function () {
+    timerLengths.push($(this).val() * 60);
+  });
+  console.log(timerLengths);
+  socket.emit("start game", {
+    roomCode: meesa.roomCode,
+    timerLengths: timerLengths,
+  });
 }
 
 //? Refresh the in-game player display
@@ -955,6 +971,9 @@ function drawLeaderControls() {
         playersInRoom = players[1];
       }
       playersInRoom.forEach(function (p) {
+        if (meesa.name == p) {
+          return;
+        }
         $("#hostageList").append(
           '<li style="text-align:center; width:100%;"><button class="selectHostageBtn" style="width:100%">' +
             p +

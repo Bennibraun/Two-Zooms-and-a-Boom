@@ -155,11 +155,11 @@ function createRoom(roomCode) {
     cards: [],
     buryCard: false,
     gameActive: false,
-    subroomA: { players: [], leader: "", usurps: [] },
-    subroomB: { players: [], leader: "", usurps: [] },
+    subroomA: { players: [], leader: "", hostages: [], usurps: [] },
+    subroomB: { players: [], leader: "", hostages: [], usurps: [] },
     timerStart: "",
     timerLengths: [],
-    currentTimer: 0,
+    currentRound: 1,
   });
 }
 
@@ -261,7 +261,8 @@ function timerRefresh(roomCode) {
   var room = getRoom(roomCode);
   io.to(roomCode).emit("timer refresh", {
     start: room.timerStart,
-    length: room.timerLengths[room.currentTimer],
+    length: room.timerLengths[room.currentRound - 1],
+    currentRound: room.currentRound,
   });
 }
 
@@ -271,6 +272,62 @@ function leaderRefresh(roomCode) {
     subroomA: room.subroomA.leader,
     subroomB: room.subroomB.leader,
   });
+}
+
+function getNumHostages(roomCode) {
+  //TODO: Implement round-tracking
+  var room = getRoom(roomCode);
+  var numPlayers =
+    getPlayerNames(roomCode)[0].length + getPlayerNames(roomCode)[1].length;
+  if (numPlayers <= 10) {
+    return 1;
+  } else if (numPlayers <= 13) {
+    switch (room.currentRound) {
+      case 1:
+      case 2:
+        return 2;
+      case 3:
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else if (numPlayers <= 17) {
+    switch (room.currentRound) {
+      case 1:
+        return 3;
+      case 2:
+      case 3:
+        return 2;
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else if (numPlayers <= 21) {
+    switch (room.currentRound) {
+      case 1:
+        return 4;
+      case 2:
+        return 3;
+      case 3:
+        return 2;
+      case 4:
+      case 5:
+        return 1;
+    }
+  } else {
+    switch (room.currentRound) {
+      case 1:
+        return 5;
+      case 2:
+        return 4;
+      case 3:
+        return 3;
+      case 4:
+        return 2;
+      case 5:
+        return 1;
+    }
+  }
 }
 
 // WebSocket handlers
@@ -475,8 +532,8 @@ io.on("connection", function (socket) {
   });
 
   //? Called to begin the game for a specific room
-  socket.on("start game", function (roomCode) {
-    var room = getRoom(roomCode);
+  socket.on("start game", function (data) {
+    var room = getRoom(data.roomCode);
 
     //* Check card selection
     var cardCount = room.subroomA.players.length + room.subroomB.players.length;
@@ -502,7 +559,7 @@ io.on("connection", function (socket) {
     }
     var playerList = room.subroomA.players.concat(room.subroomB.players);
     for (var i = 0; i < playerList.length; i++) {
-      player = getPlayer(roomCode, playerList[i].name);
+      player = getPlayer(data.roomCode, playerList[i].name);
       io.to(player.clientID).emit("your card", player.card);
     }
 
@@ -517,13 +574,16 @@ io.on("connection", function (socket) {
     room.subroomB.players = room.subroomA.players.splice(-half);
     room.subroomA.players = room.subroomA.players.splice(0, half);
 
-    io.to(roomCode).emit("let the game begin", getPlayerNames(roomCode));
+    io.to(data.roomCode).emit(
+      "let the game begin",
+      getPlayerNames(data.roomCode)
+    );
 
     room.gameActive = true;
     room.timerStart = Date.now() / 1000;
-    room.timerLengths = [600];
-    timerRefresh(roomCode);
-    gameRefresh(roomCode);
+    room.timerLengths = data.timerLengths;
+    timerRefresh(data.roomCode);
+    gameRefresh(data.roomCode);
   });
 
   socket.on("bury card setting", function (data) {
@@ -663,6 +723,57 @@ io.on("connection", function (socket) {
       });
       //* Clear all current usurp attempts since one succeeded
       subroom.usurps = [];
+    }
+  });
+
+  socket.on("hostage selection", function (data) {
+    var room = getRoom(data.roomCode);
+    var subroom;
+
+    if (
+      room.subroomA.players.find(function (p) {
+        return p.name == data.hostages[0];
+      })
+    ) {
+      subroom = room.subroomA;
+    } else {
+      subroom = room.subroomB;
+    }
+
+    subroom.hostages = data.hostages;
+  });
+
+  socket.on("timer done", function (roomCode) {
+    var room = getRoom(roomCode);
+    //* Check if last round
+    if (room.currentRound == room.timerLengths.length) {
+      //* Game over
+      io.to(roomCode).emit("game over");
+    } else {
+      //TODO: If failed to select hostages, select randoms
+
+      //* Exchange hostages
+      room.subroomA.hostages.forEach(function (name) {
+        //* Delete player from room A, add to room B
+        var tempPlayer = getPlayer(roomCode, name);
+        deletePlayer(roomCode, name);
+        room.subroomB.players.push(tempPlayer);
+      });
+      room.subroomB.hostages.forEach(function (name) {
+        //* Delete player from room B, add to room A
+        var tempPlayer = getPlayer(roomCode, name);
+        deletePlayer(roomCode, name);
+        room.subroomA.players.push(tempPlayer);
+      });
+
+      //* Advance round, restart timers
+      room.currentRound += 1;
+      io.to(roomCode).emit("timer refresh", {
+        start: Date.now() / 1000,
+        length: room.timerLengths[currentRound - 1],
+      });
+
+      gameRefresh(roomCode);
     }
   });
 });
