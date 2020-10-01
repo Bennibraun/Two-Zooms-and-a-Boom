@@ -458,11 +458,7 @@ gen_cards = [
   //? Ends the game
   socket.on("game over", function () {
     clearInterval(timer);
-    $("#gamePage").css("display", "none");
-    $("#lobbyPage").css("display", "none");
-    $("#landingPage").css("display", "none");
-    $("#gameOverPage").css("display", "");
-    $("#gameOverPage").append($("#playerCardImg").clone());
+    $("#timer").text("💣 GAME OVER 💣");
     //* Delete room-specific cookies
     deleteCookie("roomCode");
     deleteCookie("io");
@@ -498,11 +494,17 @@ gen_cards = [
 //? Begin or synchronize the master timer for this player
 //? Guaranteed to be mostly accurate since it goes by the exact time the universal timer was started
 function setTimer(startTime, length) {
+  console.log("starting timer with length " + length);
+  var now = new Date(1970, 0, 1);
+  now.setSeconds(startTime);
+  console.log("current time: " + now);
+  //TODO: remove after testing
+  length /= 10;
   clearInterval(timer);
   timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
-      if (meesa.name == players[0][0]) {
+      if (meesa.host) {
         socket.emit("timer done", meesa.roomCode);
       }
       clearInterval(timer);
@@ -1071,8 +1073,6 @@ function drawLeaderControls() {
 
 //? Returns the number of hostages needed in this round
 function getNumHostages() {
-  //TODO: Implement round-tracking
-  var currentRound = 1;
   var numPlayers = players[0].length + players[1].length;
   if (numPlayers <= 10) {
     return 1;

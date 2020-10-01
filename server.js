@@ -259,6 +259,13 @@ function gameRefresh(roomCode) {
 
 function timerRefresh(roomCode) {
   var room = getRoom(roomCode);
+  console.log("refreshing timer");
+  console.log(
+    "round: " +
+      room.currentRound +
+      ", length: " +
+      room.timerLengths[room.currentRound - 1]
+  );
   io.to(roomCode).emit("timer refresh", {
     start: room.timerStart,
     length: room.timerLengths[room.currentRound - 1],
@@ -275,7 +282,6 @@ function leaderRefresh(roomCode) {
 }
 
 function getNumHostages(roomCode) {
-  //TODO: Implement round-tracking
   var room = getRoom(roomCode);
   var numPlayers =
     getPlayerNames(roomCode)[0].length + getPlayerNames(roomCode)[1].length;
@@ -762,9 +768,9 @@ io.on("connection", function (socket) {
       //* Game over
       io.to(roomCode).emit("game over");
       //* Remove all clients from socket
-      io.sockets.clients(room).forEach(function (s) {
-        s.leave(room);
-      });
+      // io.sockets.clients(room).forEach(function (s) {
+      //   s.leave(room);
+      // });
       //* Annihilate the entire room
       rooms = rooms.filter(function (r) {
         return r.code != roomCode;
@@ -786,12 +792,22 @@ io.on("connection", function (socket) {
         room.subroomA.players.push(tempPlayer);
       });
 
-      //* Advance round, restart timers
+      //* Advance round
       room.currentRound += 1;
-      io.to(roomCode).emit("timer refresh", {
-        start: Date.now() / 1000,
-        length: room.timerLengths[room.currentRound - 1],
-      });
+
+      //* Brief respite between rounds
+      if (room.timerLengths[room.currentRound - 1] > 0) {
+        sleep(5000);
+      }
+      //* Restart timers
+      room.timerStart = Date.now() / 1000;
+      // io.to(roomCode).emit("timer refresh", {
+      //   start: Date.now() / 1000,
+      //   length: room.timerLengths[room.currentRound - 1],
+      // });
+
+      console.log("next round starting");
+      console.log(room.currentRound);
 
       gameRefresh(roomCode);
     }
