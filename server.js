@@ -647,6 +647,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("initial leader selection", function (data) {
+    console.log("setting leaders");
+
     var room = getRoom(data.roomCode);
 
     //* Look for the player in subroomA
@@ -708,9 +710,13 @@ io.on("connection", function (socket) {
       subroom = room.subroomB;
     }
 
+    console.log(subroom.usurps);
+
     var usurp = subroom.usurps.find(function (u) {
       return u.name == data.name;
     });
+
+    console.log(usurp);
 
     usurp.votes += 1;
 
@@ -745,10 +751,24 @@ io.on("connection", function (socket) {
 
   socket.on("timer done", function (roomCode) {
     var room = getRoom(roomCode);
+    console.log("timer done for round " + room.currentRound);
+    console.log(
+      "checking if current round is last (out of " +
+        room.timerLengths.length +
+        " rounds)"
+    );
     //* Check if last round
     if (room.currentRound == room.timerLengths.length) {
       //* Game over
       io.to(roomCode).emit("game over");
+      //* Remove all clients from socket
+      io.sockets.clients(room).forEach(function (s) {
+        s.leave(room);
+      });
+      //* Annihilate the entire room
+      rooms = rooms.filter(function (r) {
+        return r.code != roomCode;
+      });
     } else {
       //TODO: If failed to select hostages, select randoms
 
@@ -775,5 +795,9 @@ io.on("connection", function (socket) {
 
       gameRefresh(roomCode);
     }
+  });
+
+  socket.on("end game", function (roomCode) {
+    io.to(roomCode).emit("game over");
   });
 });

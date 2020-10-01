@@ -236,44 +236,13 @@ gen_cards = [
     });
 
     //* Show initial leader controls
-    $("#leaderControls").empty();
-    $("#leaderControls").append(
-      '<button id="appointLeader">Appoint a leader</button>'
-    );
-
-    $("#dialog").empty();
-    $("#dialog").append(
-      '<ul style="color:black;list-style:none; width:100%;" id="leaderAppointmentListing"></ul>'
-    );
-    if (players[0].includes(meesa.name)) {
-      playersInRoom = players[0];
-    } else {
-      playersInRoom = players[1];
-    }
-    playersInRoom.forEach(function (p) {
-      $("#leaderAppointmentListing").append(
-        '<li style="text-align:center; width:100%;"><button class="selectLeaderBtn" style="width:100%">' +
-          p +
-          "</button></li>"
-      );
-    });
-
-    $("#appointLeader").click(function () {
-      $("#dialog").dialog("open");
-    });
-
-    $(".selectLeaderBtn").click(function () {
-      var selectionName = $(this)[0].innerText;
-      socket.emit("initial leader selection", {
-        roomCode: meesa.roomCode,
-        name: selectionName,
-      });
-      $("#dialog").dialog("close");
-    });
+    drawLeaderControls();
   });
 
   //? Refreshes the room leaders
   socket.on("setting leaders", function (data) {
+    console.log("setting leaders");
+    console.log(data);
     var myRoom = $("#myRoomLeader");
     var otherRoom = $("#otherRoomLeader");
 
@@ -298,6 +267,13 @@ gen_cards = [
     ) {
       myRoom.text("My Room Leader: " + data.subroomB);
       otherRoom.text("Other Room Leader: " + data.subroomA);
+    } else {
+      myRoom.text("My Room Leader: None");
+      if (data.subroomA != "") {
+        otherRoom.text("Other Room Leader: " + data.subroomA);
+      } else {
+        otherRoom.text("Other Room Leader: " + data.subroomB);
+      }
     }
 
     //* If one of them hasn't been set, must preserve "unset" status
@@ -318,7 +294,8 @@ gen_cards = [
 
   //? Request a vote for a particular usurp attempt
   socket.on("vote on usurp", function (name) {
-    var dl = $("#dialog");
+    if (players[0].includes(meesa.name) && players[0].includes(name))
+      var dl = $("#dialog");
     dl.empty();
     dl.append(
       '<p style="color:black">' +
@@ -402,7 +379,7 @@ gen_cards = [
         target: data.target,
       });
       changeGuess(data.target, meesa.card.name);
-    } else if (meesa.card.name == "Leprechaun") {
+    } else if (meesa.card.name == "Leprechaun (Green)") {
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
@@ -465,7 +442,7 @@ gen_cards = [
         target: data.target,
       });
       changeGuess(data.target, meesa.card.name);
-    } else if (meesa.card.name == "Leprechaun") {
+    } else if (meesa.card.name == "Leprechaun (Green)") {
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
@@ -480,9 +457,15 @@ gen_cards = [
 
   //? Ends the game
   socket.on("game over", function () {
-    alert(
-      "Game Over! You guys can figure out who won, I ain't programming that shit in"
-    );
+    clearInterval(timer);
+    $("#gamePage").css("display", "none");
+    $("#lobbyPage").css("display", "none");
+    $("#landingPage").css("display", "none");
+    $("#gameOverPage").css("display", "");
+    $("#gameOverPage").append($("#playerCardImg").clone());
+    //* Delete room-specific cookies
+    deleteCookie("roomCode");
+    deleteCookie("io");
   });
 
   //? Sets the given cookie
@@ -524,6 +507,7 @@ function setTimer(startTime, length) {
       }
       clearInterval(timer);
       $("#timer").text("⏰ Round Over");
+      return;
     }
     var clockText =
       parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
@@ -547,7 +531,7 @@ function showLobbyPage() {
     showHostTools();
   }
   $("#roomCodeDisplay").text("Room Code: " + getCookie("roomCode"));
-  $("#joinLink").text("localhost:5000/joinCode/" + getCookie("roomCode"));
+  $("#joinLink").text("twozoomsandaboom.com/joinCode/" + getCookie("roomCode"));
 }
 
 //? Load the current player into an active game
@@ -958,6 +942,44 @@ function drawLeaderControls() {
   //* At start, just show initial appointment button
   if ($("#myRoomLeader")[0].innerText == "My Room Leader: None") {
     console.log("leader for my room not yet set.");
+    $("#leaderControls").empty();
+    $("#leaderControls").append(
+      '<button id="appointLeader">Appoint a leader</button>'
+    );
+
+    $("#dialog").empty();
+    $("#dialog").append(
+      '<ul style="color:black;list-style:none; width:100%;" id="leaderAppointmentListing"></ul>'
+    );
+    if (players[0].includes(meesa.name)) {
+      playersInRoom = players[0];
+    } else {
+      playersInRoom = players[1];
+    }
+    //* Can't appoint self as leader
+    playersInRoom = playersInRoom.filter(function (p) {
+      return p != meesa.name;
+    });
+    playersInRoom.forEach(function (p) {
+      $("#leaderAppointmentListing").append(
+        '<li style="text-align:center; width:100%;"><button class="selectLeaderBtn" style="width:100%">' +
+          p +
+          "</button></li>"
+      );
+    });
+
+    $("#appointLeader").click(function () {
+      $("#dialog").dialog("open");
+    });
+
+    $(".selectLeaderBtn").click(function () {
+      var selectionName = $(this)[0].innerText;
+      socket.emit("initial leader selection", {
+        roomCode: meesa.roomCode,
+        name: selectionName,
+      });
+      $("#dialog").dialog("close");
+    });
     return;
   }
 
@@ -1018,6 +1040,22 @@ function drawLeaderControls() {
           hostages: hostageSelection,
         });
       });
+    });
+
+    //* Show button to end game
+    $("#gamePage").append(
+      '<button id="endGameBtn" style="margin:auto;">End Game</button>'
+    );
+    $("#endGameBtn").click(function () {
+      if (confirm("Are you sure you want to end the game for everyone?")) {
+        if (
+          confirm(
+            "I'm gonna ask one more time to make sure you're absolutely certain you want to end the game."
+          )
+        ) {
+          socket.emit("end game", meesa.roomCode);
+        }
+      }
     });
     return;
   }
