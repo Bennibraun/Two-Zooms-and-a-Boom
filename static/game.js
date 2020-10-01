@@ -533,7 +533,9 @@ function showLobbyPage() {
     showHostTools();
   }
   $("#roomCodeDisplay").text("Room Code: " + getCookie("roomCode"));
-  $("#joinLink").text("twozoomsandaboom.com/joinCode/" + getCookie("roomCode"));
+  $("#joinLink").text(
+    "http://www.twozoomsandaboom.com/joinCode/" + getCookie("roomCode")
+  );
 }
 
 //? Load the current player into an active game
