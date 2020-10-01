@@ -498,8 +498,6 @@ function setTimer(startTime, length) {
   var now = new Date(1970, 0, 1);
   now.setSeconds(startTime);
   console.log("current time: " + now);
-  //TODO: remove after testing
-  length /= 10;
   clearInterval(timer);
   timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));

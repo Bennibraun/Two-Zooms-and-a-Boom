@@ -620,6 +620,7 @@ io.on("connection", function (socket) {
 
   socket.on("request card share", function (data) {
     var target = getPlayer(data.roomCode, data.target);
+    //TODO: Server crashed here, target undefined
     io.to(target.clientID).emit("card share offer", data.self);
   });
 
@@ -747,6 +748,7 @@ io.on("connection", function (socket) {
     var subroom;
 
     if (
+      //TODO: Server crashed here, room undefined
       room.subroomA.players.find(function (p) {
         return p.name == data.hostages[0];
       })
