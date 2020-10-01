@@ -12,7 +12,11 @@ var socketIO = require("socket.io");
 var cookieParser = require("cookie-parser");
 var cookie = require("cookie");
 const { exists } = require("fs");
-const { uniqueNamesGenerator, starWars } = require("unique-names-generator");
+const {
+  uniqueNamesGenerator,
+  starWars,
+  animals,
+} = require("unique-names-generator");
 
 var app = express();
 var server = http.Server(app);
@@ -351,10 +355,10 @@ io.on("connection", function (socket) {
     }
 
     if (!username) {
-      username = uniqueNamesGenerator({ dictionaries: [starWars] });
+      username = uniqueNamesGenerator({ dictionaries: [animals] });
       //* Set to a different name if the random name is already taken
       while (getNewPlayer(username)) {
-        username = uniqueNamesGenerator({ dictionaries: [starWars] });
+        username = uniqueNamesGenerator({ dictionaries: [animals] });
       }
     }
 
