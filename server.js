@@ -763,6 +763,7 @@ io.on("connection", function (socket) {
 
   socket.on("timer done", function (roomCode) {
     var room = getRoom(roomCode);
+    //TODO: Server crashed here, room undefined
     console.log("timer done for round " + room.currentRound);
     console.log(
       "checking if current round is last (out of " +
