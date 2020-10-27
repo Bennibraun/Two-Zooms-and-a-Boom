@@ -16,6 +16,9 @@ var meesa = {
 var players;
 var currentRound;
 var timer;
+var hostageSelection;
+var isLastRound;
+var buryCard = false;
 
 myStorage = window.localStorage;
 
@@ -935,9 +938,9 @@ cards = [
     immune: false,
   },
   {
-    name: "Invincible",
-    color: "grey",
-    team: "grey",
+    name: "Invincible (Blue)",
+    color: "blue",
+    team: "blue",
     url: "invincible",
     countMoved: 0,
     firstShared: null,
@@ -1313,8 +1316,14 @@ gen_cards = [
     currentRound = timer.currentRound;
   });
 
+  //? Tells the client that this is the last round
+  socket.on("last round", function () {
+    isLastRound = true;
+  });
+
   //? Officially starts the game
   socket.on("let the game begin", function (players) {
+    isLastRound = false;
     //* Create localStorage system for player menu
     var playerData = [];
     players.forEach(function (subPlayers) {
@@ -1483,16 +1492,16 @@ gen_cards = [
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
-        self: meesa.name,
-        target: data.target,
+        p1: meesa.name,
+        p2: data.target,
       });
       changeGuess(data.target, meesa.card.name);
     } else if (meesa.card.name == "Leprechaun (Green)") {
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
-        self: meesa.name,
-        target: data.target,
+        p1: meesa.name,
+        p2: data.target,
       });
       changeGuess(data.target, meesa.card.name);
     } else {
@@ -1546,16 +1555,16 @@ gen_cards = [
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
-        self: meesa.name,
-        target: data.target,
+        p1: meesa.name,
+        p2: data.target,
       });
       changeGuess(data.target, meesa.card.name);
     } else if (meesa.card.name == "Leprechaun (Green)") {
       //* Must trade cards
       socket.emit("trade cards", {
         roomCode: meesa.roomCode,
-        self: meesa.name,
-        target: data.target,
+        p1: meesa.name,
+        p2: data.target,
       });
       changeGuess(data.target, meesa.card.name);
     } else {
@@ -1564,12 +1573,22 @@ gen_cards = [
   });
 
   //? Ends the game
-  socket.on("game over", function () {
+  socket.on("game over", function (data) {
     clearInterval(timer);
+    timer = false;
     $("#timer").text("💣 GAME OVER 💣");
     //* Delete room-specific cookies
     deleteCookie("roomCode");
     deleteCookie("io");
+    //* Display everyone's actual cards
+    var allPlayers = data.subroomA.players.concat(data.subroomB.players);
+    var playerData = getFromStorage("playerData");
+    playerData.forEach(function (player) {
+      var fullPlayer = allPlayers.find(function (p) {
+        return p.name == player.name;
+      });
+      player.cardGuess = fullPlayer.card;
+    });
   });
 
   //? Sets the given cookie
@@ -1610,10 +1629,9 @@ function setTimer(startTime, length) {
   timer = setInterval(function () {
     var time = Math.ceil(length - (Date.now() / 1000 - startTime));
     if (time <= 0) {
-      if (meesa.host) {
-        socket.emit("timer done", meesa.roomCode);
-      }
+      timerDone();
       clearInterval(timer);
+      timer = false;
       $("#timer").text("⏰ Round Over");
       return;
     }
@@ -1621,6 +1639,23 @@ function setTimer(startTime, length) {
       parseInt(time / 60) + ":" + (time % 60).toString().padStart(2, "0");
     $("#timer").text("⏱️ " + clockText + "  (" + currentRound + ")");
   }, 200);
+}
+
+//? Runs when the timer finishes, or when a hostage is selected late
+function timerDone() {
+  if (meesa.leader) {
+    if (hostageSelection.length != getNumHostages() && !isLastRound) {
+      alert(
+        "You haven't selected hostages yet. Click 'set hostages' in the top left."
+      );
+      drawLeaderControls();
+    } else {
+      socket.emit("timer done", {
+        roomCode: meesa.roomCode,
+        name: meesa.name,
+      });
+    }
+  }
 }
 
 //? Load the current player to the landing page
@@ -1749,11 +1784,15 @@ function drawCards(cards, players) {
 
     //* Indicate card balance
     var playerCount = players[0].length + players[1].length;
+    if (buryCard) {
+      playerCount += 1;
+    }
     if (cards.length < playerCount) {
       $("#numCards").text(
         "Still need " + (playerCount - cards.length).toString() + " card(s)."
       );
     } else if (cards.length > playerCount) {
+      var cardsNeeded = cards.length - playerCount;
       $("#numCards").text(
         "You've selected " +
           (cards.length - playerCount).toString() +
@@ -1986,9 +2025,10 @@ function drawPlayers(players) {
   });
 }
 
-function setBuryCardTo(buryCard) {
+function setBuryCardTo(bury) {
+  buryCard = bury;
   socket.emit("bury card setting", {
-    buryCard: buryCard,
+    buryCard: bury,
     roomCode: meesa.roomCode,
   });
 }
@@ -2124,7 +2164,7 @@ function drawLeaderControls() {
       });
       dl.append('<button id="submitHostageSelection">Submit</button>');
       dl.dialog("open");
-      var hostageSelection = [];
+      hostageSelection = [];
       $(".selectHostageBtn").click(function () {
         var name = $(this).text();
         if (hostageSelection.includes(name)) {
@@ -2149,10 +2189,14 @@ function drawLeaderControls() {
           roomCode: meesa.roomCode,
           hostages: hostageSelection,
         });
+        if (!timer) {
+          timerDone();
+        }
       });
     });
 
     //* Show button to end game
+    $("#endGameBtn").remove();
     $("#gamePage").append(
       '<button id="endGameBtn" style="margin:auto;">End Game</button>'
     );

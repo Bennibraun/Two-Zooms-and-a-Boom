@@ -164,6 +164,8 @@ function createRoom(roomCode) {
     timerStart: "",
     timerLengths: [],
     currentRound: 1,
+    timerDoneA: false,
+    timerDoneB: false,
   });
 }
 
@@ -259,6 +261,10 @@ function gameRefresh(roomCode) {
   timerRefresh(roomCode);
   io.to(roomCode).emit("game refresh", { players: getPlayerNames(roomCode) });
   leaderRefresh(roomCode);
+  if (getRoom(roomCode).currentRound == getRoom(roomCode).timerLengths.length) {
+    //* This is the last round, let clients know
+    io.to(roomCode).emit("last round", "");
+  }
 }
 
 function timerRefresh(roomCode) {
@@ -546,11 +552,12 @@ io.on("connection", function (socket) {
     var room = getRoom(data.roomCode);
 
     //* Check card selection
-    var cardCount = room.subroomA.players.length + room.subroomB.players.length;
+    var cardsNeeded =
+      room.subroomA.players.length + room.subroomB.players.length;
     if (room.buryCard) {
-      cardCount += 1;
+      cardsNeeded += 1;
     }
-    if (cardCount != room.cards.length) {
+    if (cardsNeeded != room.cards.length) {
       socket.emit("alert", "Invalid number of cards.");
       return;
     }
@@ -598,6 +605,7 @@ io.on("connection", function (socket) {
 
   socket.on("bury card setting", function (data) {
     getRoom(data.roomCode).buryCard = data.buryCard;
+    lobbyRefresh(data.roomCode);
   });
 
   socket.on("request color share", function (data) {
@@ -638,8 +646,8 @@ io.on("connection", function (socket) {
   });
 
   socket.on("trade cards", function (data) {
-    p1 = getPlayer(data.roomCode, data.self);
-    p2 = getPlayer(data.roomCode, data.target);
+    p1 = getPlayer(data.roomCode, data.p1);
+    p2 = getPlayer(data.roomCode, data.p2);
 
     var tempCard = p1.card;
     p1.card = p2.card;
@@ -761,9 +769,26 @@ io.on("connection", function (socket) {
     subroom.hostages = data.hostages;
   });
 
-  socket.on("timer done", function (roomCode) {
-    var room = getRoom(roomCode);
-    //TODO: Server crashed here, room undefined
+  socket.on("timer done", function (data) {
+    var room = getRoom(data.roomCode);
+    if (
+      room.subroomA.players.find(function (p) {
+        return p.name == data.name;
+      })
+    ) {
+      room.timerDoneA = true;
+    } else if (
+      room.subroomB.players.find(function (p) {
+        return p.name == data.name;
+      })
+    ) {
+      room.timerDoneB = true;
+    }
+    if (!room.timerDoneA || !room.timerDoneB) {
+      console.log("Still waiting on a response from one room leader");
+      return;
+    }
+
     console.log("timer done for round " + room.currentRound);
     console.log(
       "checking if current round is last (out of " +
@@ -773,29 +798,28 @@ io.on("connection", function (socket) {
     //* Check if last round
     if (room.currentRound == room.timerLengths.length) {
       //* Game over
-      io.to(roomCode).emit("game over");
+      //* Tell clients game ended and send all card data for reveal
+      io.to(data.roomCode).emit("game over", room);
       //* Remove all clients from socket
       // io.sockets.clients(room).forEach(function (s) {
       //   s.leave(room);
       // });
       //* Annihilate the entire room
       rooms = rooms.filter(function (r) {
-        return r.code != roomCode;
+        return r.code != data.roomCode;
       });
     } else {
-      //TODO: If failed to select hostages, select randoms
-
       //* Exchange hostages
       room.subroomA.hostages.forEach(function (name) {
         //* Delete player from room A, add to room B
-        var tempPlayer = getPlayer(roomCode, name);
-        deletePlayer(roomCode, name);
+        var tempPlayer = getPlayer(data.roomCode, name);
+        deletePlayer(data.roomCode, name);
         room.subroomB.players.push(tempPlayer);
       });
       room.subroomB.hostages.forEach(function (name) {
         //* Delete player from room B, add to room A
-        var tempPlayer = getPlayer(roomCode, name);
-        deletePlayer(roomCode, name);
+        var tempPlayer = getPlayer(data.roomCode, name);
+        deletePlayer(data.roomCode, name);
         room.subroomA.players.push(tempPlayer);
       });
 
@@ -816,7 +840,7 @@ io.on("connection", function (socket) {
       console.log("next round starting");
       console.log(room.currentRound);
 
-      gameRefresh(roomCode);
+      gameRefresh(data.roomCode);
     }
   });
 

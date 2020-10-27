@@ -26,6 +26,23 @@ class Card {
     // switch (self.[insert attribute here])
   }
 
+  /*
+    FUNCTION GUIDE
+
+    Share Cards: Send room code, player objects (full obj with name, clientID, card)
+    
+
+    Trade Cards: Send room code, player objects (full obj with name, clientID, card)
+    socket.emit("trade cards",{
+        roomCode: meesa.roomCode,
+        p1: meesa.name,
+        p2: data.target,
+      });)
+    
+    
+
+  */
+
   // these static functions are to modify conditions of the cards themselves,
   // not to perform the share gui action
   static color_share(p1, p2) {
