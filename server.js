@@ -53,6 +53,7 @@ cards = [
   { name: "Doctor (Blue)", color: "blue", url: "doctor_blue" },
   { name: "Enforcer (Blue)", color: "blue", url: "enforcer_blue" },
   { name: "Eris (Blue)", color: "blue", url: "eris_blue" },
+  { name: "Invincible (Blue)", color: "blue", url: "invincible_blue" },
   { name: "Mayor (Blue)", color: "blue", url: "mayor_blue" },
   { name: "Medic (Blue)", color: "blue", url: "medic_blue" },
   { name: "Mime (Blue)", color: "blue", url: "mime_blue" },
@@ -118,7 +119,6 @@ cards = [
   { name: "Gambler", color: "grey", url: "gambler" },
   { name: "Hot Potato", color: "grey", url: "hotpotato" },
   { name: "Intern", color: "grey", url: "intern" },
-  { name: "Invincible", color: "grey", url: "invincible" },
   { name: "Juliet", color: "grey", url: "juliet" },
   { name: "Leprechaun (Green)", color: "green", url: "leprechaun_green" },
   { name: "Maid", color: "grey", url: "maid" },
@@ -225,6 +225,980 @@ function deletePlayer(roomCode, name) {
   room.subroomB.players = room.subroomB.players.filter(function (p) {
     return p.name != name;
   });
+}
+
+//* Converts a basic card object into a full-fledged one with properties
+function createCard(sCard) {
+  var shy = false,
+    coy = false,
+    foolish = false,
+    immune = false,
+    special = {};
+
+  // Prototypical card property assignment
+  switch (sCard.name) {
+    case "Agent (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per round, force a player into a card share (works on shy/coy)
+      special = {
+        powerUsedThisRound: false,
+      };
+      break;
+    case "Agent (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per round, force a player into a card share (works on shy/coy)
+      special = {
+        powerUsedThisRound: false,
+      };
+      break;
+    case "Ambassador (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      immune = true;
+      //? Card is publicly revealed immediately after being dealt
+      //? Can walk freely between the rooms
+      //? Can't: vote, be hostage, be leader
+      //? Can't be buried
+      // special = {  }
+      break;
+    case "Angel (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Must verbally tell the truth
+      special = { honest: true };
+      break;
+    case "Blind (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must keep eyes closed
+      //? How to implement? -black screen, only show prompts, indicate blindness to other players (since IRL it's obvious)
+      special = { blind: true };
+      break;
+    case "Bouncer (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If your room has more players than the other, privately reveal to any player and make them switch rooms
+      //? Doesn't work between rounds or during last round
+      // special = {  }
+      break;
+    case "Clown (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must smile constantly (should work over zoom)
+      // special = {  }
+      break;
+    case "Conman (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If a player agrees to color share, card share is forced
+      // special = {  }
+      break;
+    case "Coyboy (Blue)":
+      team = "blue";
+      // shy = true;
+      coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can only color share (but can be overridden by card powers)
+      //? Can be cured by psychologist
+      //? If foolish is acquired, properties cancel each other out
+      // special = {  }
+      break;
+    case "Criminal (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card sharing makes players "shy"
+      // special = {  }
+      break;
+    case "Dealer (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share gives players 'foolish'
+      // special = {  }
+      break;
+    case "Blue Team":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      // special = {  }
+      break;
+    case "Demon (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Must always tell verbal lies
+      special = { liar: true };
+      break;
+    case "Doctor (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Adds a win condition: doc must card share w/ pres before end of game
+      special = {
+        hasSharedWithPres: false,
+      };
+      break;
+    case "Enforcer (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per round, reveal to 2 players and force them to card share with one another
+      special = { powerUsedThisRound: false };
+      break;
+    case "Eris (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per game, reveal to 2 players and make them hate each other
+      //? Win condition for players 'in hate' becomes ending the game in opposite rooms.
+      //? Player in both hate and love loses both conditions
+      special = { powerUsed: false };
+      break;
+    case "Invincible (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      immune = true;
+      // special = {};
+      break;
+    case "Mayor (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If room has even # of players, public reveal gives you an extra vote when attempting to usurp
+      //? Bad if room has 6,10,14,18,22,26,30 players
+      // special = {  }
+      break;
+    case "Medic (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share removes any existing conditions from a player
+      // special = {  }
+      break;
+    case "Mime (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must be silent (make them mute on zoom?)
+      // special = {  }
+      break;
+    case "Mummy (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share gives players "curse", and they must be silent
+      // special = {  }
+      break;
+    case "Negotiator (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Savvy: may only card share. No color share, no public or private reveal.
+      special = { savvy: true };
+      break;
+    case "Nurse (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Acts as doctor if doctor is buried
+      special = { hasSharedWithPres: false };
+      break;
+    case "Paparazzo (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Prevent private conversations by intruding
+      //? Difficult over zoom, easier over discord
+      //? Potentially scrap this card
+      // special = {  }
+      break;
+    case "Paranoid (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can only card share, and only once per game
+      //? Forced share doesn't count
+      //? "Paranoid" cancelled by "foolish"
+      special = { paranoid: true, cardShareUsed: false };
+      break;
+    case "President (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Blue team loses if this card dies
+      // special = {  }
+      break;
+    case "President's Daughter (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Acts as pres if pres is buried
+      // special = { };
+      break;
+    case "Psychologist (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can privately reveal card, giving the other player the option to reveal back
+      //? If shared, the other player is cleared of all psych conditions: shy, coy, foolish, paranoid
+      // special = {  }
+      break;
+    case "Red Spy (Blue)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Red spy is red team, but appears blue
+      // special = {  }
+      break;
+    case "Security (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Tackle: publicly reveal, 'tackle' a player, making them unavailable as a hostage this round
+      special = { tackleUsed: false };
+      break;
+    case "Shyguy (Blue)":
+      team = "blue";
+      shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Shy: can't reveal card in any way
+      // special = { };
+      break;
+    case "Thug (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share makes players 'coy'
+      // special = {  }
+      break;
+    case "Tuesday Knight (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Hug: card share with bomber kills room (except president), game ends
+      //? Doesn't work on martyr
+      // special = {  }
+      break;
+    case "Usurper (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per game, publicly reveal to become leader, remain revealed permanently
+      //? Can't be usurped for the rest of the round
+      //? Doesn't work in final round
+      special = { powerUsed: false };
+      break;
+    case "Ambassador (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      immune = true;
+      //? Card is publicly revealed immediately after being dealt
+      //? Can walk freely between the rooms
+      //? Can't: vote, be hostage, be leader
+      //? Can't be buried
+      // special = {  }
+      break;
+    case "Angel (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Must verbally tell the truth
+      special = { honest: true };
+      break;
+    case "Blue Spy (Red)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Blue spy is blue team, but appears red
+      // special = {  }
+      break;
+    case "Bomber (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Kill everyone in your room when the game ends
+      // special = {  }
+      break;
+    case "Blind (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must keep eyes closed
+      //? How to implement? -black screen, only show prompts, indicate blindness to other players (since IRL it's obvious)
+      special = { blind: true };
+      break;
+    case "Bouncer (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If your room has more players than the other, privately reveal to any player and make them switch rooms
+      //? Doesn't work between rounds or during last round
+      // special = {  }
+      break;
+    case "Clown (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must smile constantly (should work over zoom)
+      // special = {  }
+      break;
+    case "Conman (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If a player agrees to color share, card share is forced
+      // special = {  }
+      break;
+    case "Coyboy (Red)":
+      team = "red";
+      // shy = true;
+      coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can only color share (but can be overridden by card powers)
+      //? Can be cured by psychologist
+      //? If foolish is acquired, properties cancel each other out
+      // special = {  }
+      break;
+    case "Criminal (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card sharing makes players "shy"
+      // special = {  }
+      break;
+    case "Cupid (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per game, privately reveal to 2 players and make them fall in love
+      //? Win condition for 'in love' becomes being in the same room together at end of the game
+      //? Power can't be used on self
+      special = {
+        powerUsed: false,
+      };
+      break;
+    case "Dealer (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share gives players 'foolish'
+      // special = {  }
+      break;
+    case "Red Team":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      // special = {  }
+      break;
+    case "Demon (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Must always tell verbal lies
+      special = { liar: true };
+      break;
+    case "Dr. Boom (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If you card share w/ pres, room dies and game ends
+      // special = {  }
+      break;
+    case "Enforcer (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per round, reveal to 2 players and force them to card share with one another
+      special = { powerUsedThisRound: false };
+      break;
+    case "Engineer (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Adds a win condition: engineer must card share w/ bomber before end of game
+      special = {
+        hasSharedWithBomber: false,
+      };
+      break;
+    case "Immunologist (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      immune = true;
+      // special = {}
+      break;
+    case "Martyr (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Acts as bomber if bomber is buried
+      // special { };
+      break;
+    case "Mayor (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? If room has even # of players, public reveal gives you an extra vote when attempting to usurp
+      //? Bad if room has 6,10,14,18,22,26,30 players
+      // special = {  }
+      break;
+    case "Medic (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share removes any existing conditions from a player
+      // special = {  }
+      break;
+    case "Mime (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Player must be silent (make them mute on zoom?)
+      // special = {  }
+      break;
+    case "Mummy (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share gives players "curse", and they must be silent
+      // special = {  }
+      break;
+    case "Negotiator (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Savvy: may only card share. No color share, no public or private reveal.
+      special = { savvy: true };
+      break;
+    case "Paparazzo (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Prevent private conversations by intruding
+      //? Difficult over zoom, easier over discord
+      //? Potentially scrap this card
+      // special = {  }
+      break;
+    case "Paranoid (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can only card share, and only once per game
+      special = { cardShareUsed: false };
+      break;
+    case "Psychologist (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Can privately reveal card, giving the other player the option to reveal back
+      //? If shared, the other player is cleared of all psych conditions: shy, coy, foolish, paranoid
+      // special = {  }
+      break;
+    case "Security (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Tackle: publicly reveal, 'tackle' a player, making them unavailable as a hostage this round
+      special = { tackleUsed: false };
+      break;
+    case "Shyguy (Red)":
+      team = "red";
+      shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Shy: can't reveal card in any way
+      // special = {  }
+      break;
+    case "Thug (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card share makes players 'coy'
+      // special = {  }
+      break;
+    case "Tinkerer (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Acts as engineer if engineer is buried
+      special = { hasSharedWithBomber: false };
+      break;
+    case "Usurper (Red)":
+      team = "red";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Once per game, publicly reveal to become leader, remain revealed permanently
+      //? Can't be usurped for the rest of the round
+      //? Doesn't work in final round
+      special = { powerUsed: false };
+      break;
+    case "Agoraphobe":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Wind condition: never leave initial room
+      special = { hasSwitchedRooms: false };
+      break;
+    case "Ahab":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win condition: Moby is with bomber at end of game, and self is not
+      // special = {  }
+      break;
+    case "Anarchist":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: vote for successful usurper during a majority of the rounds
+      special = { goodVoteCount: 0 };
+      break;
+    case "Bomb Bot":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as bomber and not president
+      // special = {  }
+      break;
+    case "Butler":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as maid and president
+      // special = {  }
+      break;
+    case "Clone":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: first player you card or color shared with wins
+      //? Lose if didn't share at all
+      special = { firstShare: "" };
+      break;
+    case "Decoy":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: sniper shoots you at end of game
+      // special = {  }
+      break;
+    case "Drunk":
+      team = "none";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Replaces a random card
+      //? Has no identity until final round
+      //? "Sobers up" at beginning of last round, is given the original card
+      //? How to implement? -need to be able to retrieve sober card noticeably
+      //? Shouldn't be a card, instead an option available in menu
+      //? Drunk can have conditions, but sober remains clean until final round
+      // special = {  }
+      break;
+    case "Gambler":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? At end of game, before card reveal, you publicly announce which team you think won
+      //? Win if correct
+      // special = {  }
+      break;
+    case "Hot Potato":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Card or color sharing forces a trade
+      //? Cards retain conditions/properties
+      //? Hot Potato can't win
+      // special = {  }
+      break;
+    case "Intern":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as president
+      // special = {  }
+      break;
+    case "Invincible (Blue)":
+      team = "blue";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      immune = true;
+      // special = {  }
+      break;
+    case "Juliet":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as Romeo and Bomber
+      // special = {  }
+      break;
+    case "Leprechaun (Green)":
+      team = "green";
+      // shy = true;
+      // coy = true;
+      foolish = true;
+      // immune = true;
+      //? Card and color shares force trade
+      //? Each player can only get this card once
+      special = { playerBlacklist: [] };
+      break;
+    case "Maid":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as Butler and President
+      // special = {  }
+      break;
+    case "Mastermind":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: is room leader at end and was leader of opposite room at one point
+      special = { leadRoomA: false, leadRoomB: false };
+      break;
+    case "MI6":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: card share with Bomber and President before end
+      special = { hasSharedWithBomber: false, hasSharedWithPres: false };
+      break;
+    case "Minion":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: leader of your room is never usurped
+      special = { leaderNeverUsurped: true };
+      break;
+    case "Mistress":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as President and not Wife
+      // special = {  }
+      break;
+    case "Moby":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: Ahab in same room as Bomber, and self in opposite room
+      // special = {  }
+      break;
+    case "Nuclear Tyrant":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      foolish = true;
+      // immune = true;
+      //? Win Condition: never card shared with President and Bomber
+      //? If Nuclear Tyrant wins, everyone else loses
+      // special = {  }
+      break;
+    case "Private Eye":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? At end of game, publicly announce identity of buried card, win if correct
+      //? Requires card burying
+      // special = {  }
+      break;
+    case "Queen":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: different room than President and Bomber
+      // special = {  }
+      break;
+    case "Rival":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: different room than President
+      // special = {  }
+      break;
+    case "Robot":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: first player you shared with fails their win objectives
+      //? Lose if didn't share at all
+      special = { firstShare: "" };
+      break;
+    case "Romeo":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as Juliet and Bomber
+      // special = {  }
+      break;
+    case "Sniper":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: Publicly shoot a player, win if they were the Target
+      //? Selected player need not be in same room
+      // special = {  }
+      break;
+    case "Survivor":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: different room than Bomber
+      // special = {  }
+      break;
+    case "Target":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: avoid being shot by Sniper
+      // special = {  }
+      break;
+    case "Traveler":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: sent as hostage in majority of rounds
+      special = { roomSwitchCount: 0 };
+      break;
+    case "Victim":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as Bomber
+      // special = {  }
+      break;
+    case "Wife":
+      team = "grey";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Win Condition: same room as President, not Mistress
+      // special = {  }
+      break;
+    case "Zombie (Green)":
+      team = "zombie";
+      // shy = true;
+      // coy = true;
+      // foolish = true;
+      // immune = true;
+      //? Creates Team Zombie
+      //? Win Condition: all living players are Team Zombie at end of game
+      //? Card or color share gives 'zombie' condition
+      //? Players know they are zombies and tell their victims when they become zombies
+      //? Incompatible with Invincible & Immunologist
+      special = { zombie: true };
+      break;
+  }
+
+  card = new Card(
+    sCard.name,
+    sCard.color,
+    team,
+    sCard.url,
+    shy,
+    coy,
+    foolish,
+    immune,
+    special
+  );
+
+  return card;
 }
 
 //* Returns the requested card object
@@ -572,7 +1546,7 @@ io.on("connection", function (socket) {
 
     //* Distribute cards
     for (var i = 0; i < room.subroomA.players.length; i++) {
-      room.subroomA.players[i].card = room.cards[i];
+      room.subroomA.players[i].card = createCard(room.cards[i]);
     }
     var playerList = room.subroomA.players.concat(room.subroomB.players);
     for (var i = 0; i < playerList.length; i++) {

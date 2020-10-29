@@ -24,6 +24,25 @@ myStorage = window.localStorage;
 
 cards = [
   {
+    name: "blue",
+    color: "blue",
+    team: "blue",
+    url: "/card_teams/blue_team",
+  },
+  { name: "gen_red", color: "red", team: "red", url: "/card_teams/red_team" },
+  {
+    name: "grey",
+    color: "grey",
+    team: "grey",
+    url: "/card_teams/grey_team",
+  },
+  {
+    name: "green",
+    color: "green",
+    team: "green",
+    url: "/card_teams/green_team_l",
+  },
+  {
     name: "Agent (Blue)",
     color: "blue",
     team: "blue",
@@ -497,18 +516,6 @@ cards = [
     color: "red",
     team: "red",
     url: "clown_red",
-    countMoved: 0,
-    firstShared: null,
-    shy: false,
-    coy: false,
-    foolish: false,
-    immune: false,
-  },
-  {
-    name: " (Red)",
-    color: "red",
-    team: "red",
-    url: "blind_red",
     countMoved: 0,
     firstShared: null,
     shy: false,
@@ -1203,46 +1210,6 @@ cards = [
   },
 ];
 
-function createCard(card) {
-  var newCard = Card(
-    card.name,
-    card.color,
-    card.team,
-    card.url,
-    card.countMoved,
-    card.firstShared,
-    card.shy,
-    card.coy,
-    card.foolish,
-    card.immune
-  );
-
-  newCard.setAttributes();
-  return newCard;
-}
-
-gen_cards = [
-  {
-    name: "gen_blue",
-    color: "blue",
-    team: "blue",
-    url: "/card_teams/blue_team",
-  },
-  { name: "gen_red", color: "red", team: "red", url: "/card_teams/red_team" },
-  {
-    name: "gen_grey",
-    color: "grey",
-    team: "grey",
-    url: "/card_teams/grey_team",
-  },
-  {
-    name: "gen_green",
-    color: "green",
-    team: "green",
-    url: "/card_teams/green_team_l",
-  },
-];
-
 //* Proper Code
 
 //* Socket listeners
@@ -1474,8 +1441,8 @@ gen_cards = [
 
   //? Carry out the color share
   socket.on("color share complete", function (data) {
-    var cardUrl = gen_cards.find(function (c) {
-      return c.color == data.color;
+    var cardUrl = cards.find(function (c) {
+      return c.name == data.color;
     });
     if (!cardUrl) {
       cardUrl = cards.find(function (c) {
@@ -1487,43 +1454,7 @@ gen_cards = [
     $("#shareCardImg").attr("src", cardUrl);
     $("#otherCardName").text(data.target);
 
-    //* Special cases
-    if (meesa.card.name == "Hot Potato") {
-      //* Must trade cards
-      socket.emit("trade cards", {
-        roomCode: meesa.roomCode,
-        p1: meesa.name,
-        p2: data.target,
-      });
-      changeGuess(data.target, meesa.card.name);
-    } else if (meesa.card.name == "Leprechaun (Green)") {
-      //* Must trade cards
-      socket.emit("trade cards", {
-        roomCode: meesa.roomCode,
-        p1: meesa.name,
-        p2: data.target,
-      });
-      changeGuess(data.target, meesa.card.name);
-    } else {
-      var cardGuess;
-      switch (data.color) {
-        case "blue":
-          cardGuess = "gen_blue";
-          break;
-        case "red":
-          cardGuess = "gen_red";
-          break;
-        case "grey":
-          cardGuess = "gen_grey";
-          break;
-        case "green":
-          cardGuess = "gen_green";
-          break;
-        default:
-          cardGuess = "";
-      }
-      changeGuess(data.target, cardGuess);
-    }
+    changeGuess(data.target, data.color);
   });
 
   //? Someone wants to card share
@@ -1896,19 +1827,14 @@ function drawPlayers(players) {
     var cardName = playerData.filter(function (player) {
       return player.name == p;
     })[0].cardGuess;
-    var img_match = gen_cards.filter(function (card) {
+
+    img_match = cards.filter(function (card) {
       return card.name == cardName;
     });
     if (img_match.length == 0) {
-      img_match = cards.filter(function (card) {
-        return card.name == cardName;
-      });
-      if (img_match.length == 0) {
-        console.log(
-          "No card match found to display. Fine if none was selected."
-        );
-      }
+      console.log("No card match found to display. Fine if none was selected.");
     }
+
     if (img_match[0]) {
       img_url = ' src="/static/cards/' + img_match[0].url + '.jpg"';
     } else {
