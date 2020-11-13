@@ -40,9 +40,7 @@ class Card {
 
   // these static functions are to modify conditions of the cards themselves,
   // not to perform the share gui action
-  static doColorShare(p1, p2) {
-    
-  }
+  static doColorShare(p1, p2) {}
 
   static doCardShare(p1, p2) {}
 
@@ -78,5 +76,4 @@ class Card {
   //       p2.coy = false;
   //     }
   //   }
-  }
 }

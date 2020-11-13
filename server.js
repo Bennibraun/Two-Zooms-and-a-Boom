@@ -17,6 +17,7 @@ const {
   starWars,
   animals,
 } = require("unique-names-generator");
+var cardTypes = require("./card_type.js");
 
 var app = express();
 var server = http.Server(app);
@@ -142,6 +143,47 @@ cards = [
   { name: "Zombie (Green)", color: "green", url: "zombie_green" },
 ];
 
+//* Create Card class
+class Card {
+  // Required: name,color,team,url
+  // Optional: shy,coy,foolish,immune,special
+  constructor(
+    name,
+    color,
+    team,
+    url,
+    shy = false,
+    coy = false,
+    foolish = false,
+    immune = false,
+    special = {}
+  ) {
+    this.name = name;
+    this.color = color;
+    this.team = team;
+    this.url = url;
+    this.countMoved = 0; // counts room moves, not trades
+    this.firstShared = null;
+    this.shy = shy;
+    this.coy = coy;
+    this.foolish = foolish;
+    this.immune = immune;
+    this.special = special;
+  }
+
+  // these static functions are to modify conditions of the cards themselves,
+  // not to perform the share gui action
+  static doColorShare(p1, p2) {}
+
+  static doCardShare(p1, p2) {}
+
+  static doPublicReveal(p1) {}
+
+  static doPrivateReveal(p1, p2) {}
+
+  static doCardTrade(p1, p2) {}
+}
+
 function sleep(milliseconds) {
   let timeStart = new Date().getTime();
   while (true) {
@@ -229,7 +271,8 @@ function deletePlayer(roomCode, name) {
 
 //* Converts a basic card object into a full-fledged one with properties
 function createCard(sCard) {
-  var shy = false,
+  var team = "",
+    shy = false,
     coy = false,
     foolish = false,
     immune = false,
@@ -1186,7 +1229,7 @@ function createCard(sCard) {
       break;
   }
 
-  card = new Card(
+  return new Card(
     sCard.name,
     sCard.color,
     team,
@@ -1197,8 +1240,6 @@ function createCard(sCard) {
     immune,
     special
   );
-
-  return card;
 }
 
 //* Returns the requested card object
@@ -1220,11 +1261,11 @@ function colorShareRequest(roomCode, p1, p2) {
   }
 
   //* Target is foolish (Can't deny share)
-  
+
   // TODO: send share info to p2
-  
+
   //* Force color share
-  
+
   io.to(p2.clientID).emit("color share offer", p1.name);
 }
 
