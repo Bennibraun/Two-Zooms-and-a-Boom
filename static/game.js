@@ -1427,10 +1427,7 @@ cards = [
 
   //? Someone wants to color share
   socket.on("color share offer", function (from) {
-    if (
-      meesa.card.name == "Leprechaun (Green)" ||
-      confirm(from + " would like to color share with you, do you accept?")
-    ) {
+    if (confirm(from + " would like to color share with you, do you accept?")) {
       socket.emit("accept color share", {
         self: meesa.name,
         target: from,
@@ -1935,7 +1932,7 @@ function drawPlayers(players) {
   $(".colorShareBtn").click(function () {
     var target = $(this).parent().parent().children("h3")[0].innerText;
     socket.emit("request color share", {
-      self: meesa.name,
+      self: meesa,
       target: target,
       roomCode: meesa.roomCode,
     });

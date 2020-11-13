@@ -52,31 +52,31 @@ class Card {
 
   static doCardTrade(p1, p2) {}
 
-  static card_share_help(p1, p2) {
-    // Immune exemption
-    if (!p2.immune) {
-      // Dealer mechanic
-      if (p1.name == "Dealer (Blue)" || p1.name == "Dealer (Red)") {
-        p2.foolish = true;
-      }
-      // Criminal mechanic
-      else if (p1.name == "Criminal (Blue)" || p1.name == "Criminal (Red)") {
-        p2.shy = true;
-      }
-      // Thug mechanic
-      else if (p1.name == "Thug (Blue)" || p1.name == "Thug (Red)") {
-        p2.coy = true;
-      }
+  // static card_share_help(p1, p2) {
+  //   // Immune exemption
+  //   if (!p2.immune) {
+  //     // Dealer mechanic
+  //     if (p1.name == "Dealer (Blue)" || p1.name == "Dealer (Red)") {
+  //       p2.foolish = true;
+  //     }
+  //     // Criminal mechanic
+  //     else if (p1.name == "Criminal (Blue)" || p1.name == "Criminal (Red)") {
+  //       p2.shy = true;
+  //     }
+  //     // Thug mechanic
+  //     else if (p1.name == "Thug (Blue)" || p1.name == "Thug (Red)") {
+  //       p2.coy = true;
+  //     }
 
-      // Remove offsetting conditions
-      if (p2.foolish && p2.shy) {
-        p2.foolish = false;
-        p2.shy = false;
-      }
-      if (p2.foolish && p2.coy) {
-        p2.foolish = false;
-        p2.coy = false;
-      }
-    }
+  //     // Remove offsetting conditions
+  //     if (p2.foolish && p2.shy) {
+  //       p2.foolish = false;
+  //       p2.shy = false;
+  //     }
+  //     if (p2.foolish && p2.coy) {
+  //       p2.foolish = false;
+  //       p2.coy = false;
+  //     }
+  //   }
   }
 }

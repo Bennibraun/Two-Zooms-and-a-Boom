@@ -1213,6 +1213,21 @@ function getCard(cardName) {
   return myCard;
 }
 
+function colorShareRequest(roomCode, p1, p2) {
+  //* Block color share
+  if (p2.card.special.savvy) {
+    alert("You can't color share with this player.");
+  }
+
+  //* Target is foolish (Can't deny share)
+  
+  // TODO: send share info to p2
+  
+  //* Force color share
+  
+  io.to(p2.clientID).emit("color share offer", p1.name);
+}
+
 //? Routing
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
@@ -1583,8 +1598,7 @@ io.on("connection", function (socket) {
   });
 
   socket.on("request color share", function (data) {
-    var target = getPlayer(data.roomCode, data.target);
-    io.to(target.clientID).emit("color share offer", data.self);
+    colorShareRequest(data.roomCode, data.self, data.target);
   });
 
   socket.on("accept color share", function (data) {
